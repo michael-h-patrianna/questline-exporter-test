@@ -1,24 +1,167 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useState } from 'react';
+import { QuestlineViewer } from './components/QuestlineViewer';
+import { extractQuestlineZip } from './utils/zipExtractor';
+import { ExtractedAssets, QuestState } from './types';
 import './App.css';
 
 function App() {
+  // Constrain width and height to prevent overflow
+  // Account for the questline-container's available space and padding
+  const containerPadding = 32; // 16px padding on each side
+  const availableWidth = Math.min(1200, window.innerWidth - 100) - containerPadding;
+  const availableHeight = Math.min(800, window.innerHeight - 200) - containerPadding;
+  const maxWidth = Math.max(200, availableWidth);
+  const maxHeight = Math.max(200, availableHeight);
+  
+  const [extractedAssets, setExtractedAssets] = useState<ExtractedAssets | null>(null);
+  const [questStates, setQuestStates] = useState<QuestState>({});
+  const [containerWidth, setContainerWidth] = useState(Math.min(800, maxWidth));
+  const [containerHeight, setContainerHeight] = useState(Math.min(600, maxHeight));
+  const [error, setError] = useState<string | null>(null);
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setError(null);
+      const assets = await extractQuestlineZip(file);
+      setExtractedAssets(assets);
+      
+      // Initialize all quests as closed (not locked)
+      const initialStates: QuestState = {};
+      assets.questlineData.quests.forEach(quest => {
+        initialStates[quest.questKey] = 'closed';
+      });
+      setQuestStates(initialStates);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to extract ZIP file');
+    }
+  };
+
+  const handleQuestClick = (questKey: string) => {
+    if (!extractedAssets) return;
+    
+    setQuestStates(prev => {
+      const currentState = prev[questKey] || 'locked';
+      let nextState: 'locked' | 'open' | 'closed';
+      
+      switch (currentState) {
+        case 'locked':
+          nextState = 'open';
+          break;
+        case 'open':
+          nextState = 'closed';
+          break;
+        case 'closed':
+          nextState = 'locked';
+          break;
+        default:
+          nextState = 'locked';
+      }
+      
+      return { ...prev, [questKey]: nextState };
+    });
+  };
+
+  const handleContainerClick = (event: React.MouseEvent) => {
+    const target = event.target as HTMLElement;
+    // Check if the clicked element is a quest item or its child
+    const questItem = target.closest('.quest-item');
+    if (questItem) {
+      // Find the quest key from the quest item's key or title
+      const questKey = questItem.getAttribute('data-quest-key') || 
+                      (questItem as HTMLElement).title?.match(/Quest: (\w+)/)?.[1];
+      if (questKey) {
+        handleQuestClick(questKey);
+      }
+    }
+  };
+
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <h1>Questline Demo</h1>
+        <p>Upload a ZIP file exported from the Figma Questline Plugin</p>
       </header>
+      
+      <main className="App-main">
+        <div className="upload-section">
+          <input
+            type="file"
+            accept=".zip"
+            onChange={handleFileUpload}
+            className="file-input"
+          />
+          {error && <div className="error-message">{error}</div>}
+        </div>
+
+        {extractedAssets && (
+          <>
+            <div className="controls-section">
+              <h3>Responsive Controls</h3>
+              <div className="control-group">
+                <label>
+                  Width: {containerWidth}px
+                  <input
+                    type="range"
+                    min="200"
+                    max={maxWidth}
+                    value={containerWidth}
+                    onChange={(e) => setContainerWidth(Number(e.target.value))}
+                  />
+                </label>
+              </div>
+              <div className="control-group">
+                <label>
+                  Height: {containerHeight}px
+                  <input
+                    type="range"
+                    min="200"
+                    max={maxHeight}
+                    value={containerHeight}
+                    onChange={(e) => setContainerHeight(Number(e.target.value))}
+                  />
+                </label>
+              </div>
+              <div className="preset-buttons">
+                <button onClick={() => { setContainerWidth(400); setContainerHeight(300); }}>
+                  Mobile
+                </button>
+                <button onClick={() => { setContainerWidth(800); setContainerHeight(600); }}>
+                  Desktop
+                </button>
+                <button onClick={() => { setContainerWidth(Math.min(1200, maxWidth)); setContainerHeight(400); }}>
+                  Wide
+                </button>
+              </div>
+            </div>
+
+            <div className="questline-container" onClick={handleContainerClick}>
+              <QuestlineViewer
+                questlineData={extractedAssets.questlineData}
+                backgroundImage={extractedAssets.backgroundImage}
+                questImages={extractedAssets.questImages}
+                questStates={questStates}
+                containerWidth={containerWidth}
+                containerHeight={containerHeight}
+              />
+            </div>
+
+            <div className="info-section">
+              <h3>Quest States</h3>
+              <p>Click on quests to cycle through states: locked → open → closed</p>
+              <div className="quest-states">
+                {extractedAssets.questlineData.quests.map(quest => (
+                  <div key={quest.questKey} className="quest-state-item">
+                    <strong>{quest.questKey}:</strong> {questStates[quest.questKey] || 'locked'}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+      </main>
     </div>
   );
 }
