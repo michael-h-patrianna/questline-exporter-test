@@ -2,7 +2,6 @@
   position: relative;
   border: 2px dashed #4a90e2;
   border-radius: 12px;
-  pointer-events: none;
 }
 
 .container-label {

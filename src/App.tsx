@@ -42,9 +42,13 @@ function App() {
   const handleQuestClick = (questKey: string) => {
     if (!extractedAssets) return;
     
+    console.log('handleQuestClick called with questKey:', questKey);
+    
     setQuestStates(prev => {
       const currentState = prev[questKey] || 'locked';
       let nextState: 'locked' | 'active' | 'unclaimed' | 'completed';
+      
+      console.log('Current state for', questKey, ':', currentState);
       
       switch (currentState) {
         case 'locked':
@@ -58,28 +62,56 @@ function App() {
           break;
         case 'completed':
           nextState = 'locked';
-          nextState = 'locked';
-          break;
           break;
         default:
           nextState = 'locked';
       }
       
-      return { ...prev, [questKey]: nextState };
+      console.log('Next state for', questKey, ':', nextState);
+      console.log('Previous states:', prev);
+      
+      const newStates = { ...prev, [questKey]: nextState };
+      console.log('New states:', newStates);
+      
+      return newStates;
     });
   };
 
   const handleContainerClick = (event: React.MouseEvent) => {
     const target = event.target as HTMLElement;
+    console.log('Click target:', target);
+    console.log('Target tagName:', target.tagName);
+    console.log('Target classList:', target.classList);
+    console.log('Target parentElement:', target.parentElement);
+    
     // Check if the clicked element is a quest item or its child
-    const questItem = target.closest('.quest-item');
+    let questItem = target.closest('.quest-item');
+    console.log('Quest item found via closest:', questItem);
+    
+    // If not found via closest, check if the target itself is a quest item
+    if (!questItem && target.classList.contains('quest-item')) {
+      questItem = target;
+      console.log('Quest item found via direct class check:', questItem);
+    }
+    
+    // If still not found, check if the target is an img inside a quest item
+    if (!questItem && target.tagName === 'IMG') {
+      questItem = target.closest('.quest-item');
+      console.log('Quest item found via img parent:', questItem);
+    }
+    
     if (questItem) {
       // Find the quest key from the quest item's key or title
       const questKey = questItem.getAttribute('data-quest-key') || 
                       (questItem as HTMLElement).title?.match(/Quest: (\w+)/)?.[1];
+      console.log('Quest key found:', questKey);
+      
       if (questKey) {
+        console.log('Calling handleQuestClick with:', questKey);
         handleQuestClick(questKey);
       }
+    } else {
+      console.log('No quest item found for this click');
     }
   };
 
