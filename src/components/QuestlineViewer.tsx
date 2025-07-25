@@ -8,8 +8,9 @@ interface QuestlineViewerProps {
   questImages: {
     [questKey: string]: {
       locked?: string;
-      open?: string;
-      closed?: string;
+      active?: string;
+      unclaimed?: string;
+      completed?: string;
     };
   };
   questStates: QuestState;
@@ -72,9 +73,8 @@ export const QuestlineViewer: React.FC<QuestlineViewerProps> = ({
       >
       {questlineData.quests.map((quest) => {
         const questState = questStates[quest.questKey] || 'locked';
-        // Map 'open' state to 'done' for the new structure
-        const imageState = questState === 'open' ? 'done' : questState;
-        const questImage = (questImages[quest.questKey] as any)?.[imageState];
+        // Use the quest state directly for the new 4-state system
+        const questImage = (questImages[quest.questKey] as any)?.[questState];
         
         if (!questImage) {
           return null;

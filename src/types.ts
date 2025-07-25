@@ -18,13 +18,14 @@ export interface Quest {
   h: number;
   rotation: number;
   lockedImg: string;
-  closedImg: string;
-  doneImg: string;
+  activeImg: string; // mandatory
+  unclaimedImg: string;
+  completedImg: string;
   isFlattened?: boolean;
 }
 
 export interface QuestState {
-  [questKey: string]: 'locked' | 'open' | 'closed';
+  [questKey: string]: 'locked' | 'active' | 'unclaimed' | 'completed';
 }
 
 export interface ExtractedAssets {
@@ -33,8 +34,9 @@ export interface ExtractedAssets {
   questImages: {
     [questKey: string]: {
       locked?: string;
-      closed?: string;
-      done?: string;
+      active?: string;
+      unclaimed?: string;
+      completed?: string;
     };
   };
 } 

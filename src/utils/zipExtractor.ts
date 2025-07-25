@@ -54,8 +54,9 @@ export async function extractQuestlineZip(zipFile: File): Promise<ExtractedAsset
     // Use the image filenames from the JSON data
     const imageStates = [
       { state: 'locked', filename: quest.lockedImg },
-      { state: 'closed', filename: quest.closedImg },
-      { state: 'done', filename: quest.doneImg }
+      { state: 'active', filename: quest.activeImg },
+      { state: 'unclaimed', filename: quest.unclaimedImg },
+      { state: 'completed', filename: quest.completedImg }
     ];
     
     console.log(`Quest ${quest.questKey} image states:`, imageStates);

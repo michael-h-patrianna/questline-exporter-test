@@ -31,7 +31,7 @@ function App() {
       // Initialize all quests as closed (not locked)
       const initialStates: QuestState = {};
       assets.questlineData.quests.forEach(quest => {
-        initialStates[quest.questKey] = 'closed';
+        initialStates[quest.questKey] = 'active';
       });
       setQuestStates(initialStates);
     } catch (err) {
@@ -44,17 +44,22 @@ function App() {
     
     setQuestStates(prev => {
       const currentState = prev[questKey] || 'locked';
-      let nextState: 'locked' | 'open' | 'closed';
+      let nextState: 'locked' | 'active' | 'unclaimed' | 'completed';
       
       switch (currentState) {
         case 'locked':
-          nextState = 'open';
+          nextState = 'active';
           break;
-        case 'open':
-          nextState = 'closed';
+        case 'active':
+          nextState = 'unclaimed';
           break;
-        case 'closed':
+        case 'unclaimed':
+          nextState = 'completed';
+          break;
+        case 'completed':
           nextState = 'locked';
+          nextState = 'locked';
+          break;
           break;
         default:
           nextState = 'locked';
@@ -150,7 +155,7 @@ function App() {
 
             <div className="info-section">
               <h3>Quest States</h3>
-              <p>Click on quests to cycle through states: locked → open → closed</p>
+              <p>Click on quests to cycle through states: locked → active → unclaimed → completed</p>
               <div className="quest-states">
                 {extractedAssets.questlineData.quests.map(quest => (
                   <div key={quest.questKey} className="quest-state-item">
