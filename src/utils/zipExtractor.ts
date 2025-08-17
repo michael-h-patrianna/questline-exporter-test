@@ -90,7 +90,8 @@ export async function extractQuestlineZip(zipFile: File): Promise<ExtractedAsset
     const rewardsImageStates = [
       { state: 'active', filename: questlineData.rewards.activeImg },
       { state: 'fail', filename: questlineData.rewards.failImg },
-      { state: 'claimed', filename: questlineData.rewards.claimedImg }
+      { state: 'claimed', filename: questlineData.rewards.claimedImg },
+      { state: 'unclaimed', filename: questlineData.rewards.unclaimedImg },
     ] as const;
 
     for (const { state, filename } of rewardsImageStates) {

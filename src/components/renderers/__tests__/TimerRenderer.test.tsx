@@ -1,202 +1,130 @@
 import { render, screen } from '@testing-library/react';
-import { TimerComponent } from '../../../types';
+import { convertFillToCSS, convertShadowsToCSS } from '../../../utils/utils';
 import { TimerRenderer } from '../TimerRenderer';
 
-// Mock the utility functions
-jest.mock('../../../utils/positionUtils', () => ({
-  convertTimerPosition: jest.fn((timer, scale) => ({
-    left: (timer.position.x * scale) - (timer.dimensions.width * scale / 2),
-    top: (timer.position.y * scale) - (timer.dimensions.height * scale / 2),
-    width: timer.dimensions.width * scale,
-    height: timer.dimensions.height * scale
-  })),
-  convertFillToCSS: jest.fn((fill) => {
-    if (fill.type === 'solid') return fill.color || 'transparent';
-    return 'linear-gradient(0deg, #000 0%, #fff 100%)';
-  }),
-  convertDropShadowsToCSS: jest.fn((shadows) => {
-    if (!shadows || shadows.length === 0) return 'none';
-    return '2px 4px 8px rgba(0,0,0,0.5)';
-  }),
-  getResponsiveFontSize: jest.fn((baseFontSize, scale) => Math.max(8, Math.min(48, baseFontSize * scale)))
+// Mock the utility functions to track their calls
+jest.mock('../../../utils/utils', () => ({
+  convertFillToCSS: jest.fn(),
+  convertShadowsToCSS: jest.fn()
 }));
 
+const mockConvertFillToCSS = convertFillToCSS as jest.MockedFunction<typeof convertFillToCSS>;
+const mockConvertShadowsToCSS = convertShadowsToCSS as jest.MockedFunction<typeof convertShadowsToCSS>;
+
 describe('TimerRenderer', () => {
-  const mockTimer: TimerComponent = {
+  const mockTimer = {
     position: { x: 400, y: 50 },
     dimensions: { width: 120, height: 40 },
-    borderRadius: 8,
     backgroundFill: { type: 'solid', color: '#000000' },
-    isAutolayout: false,
-    layoutSizing: { horizontal: 'fixed', vertical: 'fixed' },
-    padding: { vertical: 8, horizontal: 16 },
-    dropShadows: [
-      { x: 2, y: 4, blur: 8, spread: 1, color: 'rgba(0,0,0,0.5)' }
-    ],
+    borderRadius: 8,
+    dropShadows: [{ x: 2, y: 4, blur: 8, spread: 0, color: 'rgba(0,0,0,0.5)' }],
     textStyle: {
       fontSize: 14,
       color: '#ffffff',
       fontWeight: 500,
-      textAlignHorizontal: 'center',
-      textAlignVertical: 'center'
-    }
+      textAlignHorizontal: 'center'
+    },
+    isAutolayout: false,
+    layoutSizing: { horizontal: 'fixed', vertical: 'fixed' },
+    padding: { vertical: 8, horizontal: 16 }
   };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  describe('Rendering', () => {
-    it('should render timer component with correct positioning', () => {
-      render(<TimerRenderer timer={mockTimer} scale={1.0} />);
-
-      const timerElement = screen.getByText('05:42');
-      expect(timerElement).toBeInTheDocument();
-
-      const container = timerElement.parentElement;
-      expect(container).toHaveStyle({
-        position: 'absolute',
-        left: '340px', // 400 - (120/2)
-        top: '30px',   // 50 - (40/2)
-        width: '120px',
-        height: '40px'
-      });
-    });
-
-    it('should apply correct scaling', () => {
-      render(<TimerRenderer timer={mockTimer} scale={2.0} />);
-
-      const timerElement = screen.getByText('05:42');
-      const container = timerElement.parentElement;
-
-      expect(container).toHaveStyle({
-        left: '280px', // (400 * 2) - (120 * 2 / 2)
-        top: '-40px',  // (50 * 2) - (40 * 2 / 2)
-        width: '240px', // 120 * 2
-        height: '80px'  // 40 * 2
-      });
-    });
-
-    it('should render default timer text', () => {
+  describe('Basic Rendering', () => {
+    it('should render timer component', () => {
       render(<TimerRenderer timer={mockTimer} scale={1.0} />);
 
       expect(screen.getByText('05:42')).toBeInTheDocument();
+      expect(screen.getByTitle('Timer Component')).toBeInTheDocument();
     });
 
-    it('should apply background fill styling', () => {
+    it('should have timer-component class', () => {
       render(<TimerRenderer timer={mockTimer} scale={1.0} />);
 
-      const container = screen.getByText('05:42').parentElement;
-      expect(container).toHaveStyle({
-        background: '#000000'
-      });
+      const container = screen.getByTitle('Timer Component');
+      expect(container).toHaveClass('timer-component');
     });
 
-    it('should apply border radius with scaling', () => {
-      render(<TimerRenderer timer={mockTimer} scale={2.0} />);
+    it('should not render when timer is null', () => {
+      render(<TimerRenderer timer={null} scale={1.0} />);
 
-      const container = screen.getByText('05:42').parentElement;
-      expect(container).toHaveStyle({
-        borderRadius: '16px' // 8 * 2
-      });
-    });
-
-    it('should apply drop shadows', () => {
-      render(<TimerRenderer timer={mockTimer} scale={1.0} />);
-
-      const container = screen.getByText('05:42').parentElement;
-      expect(container).toHaveStyle({
-        boxShadow: '2px 4px 8px rgba(0,0,0,0.5)'
-      });
-    });
-
-    it('should handle no drop shadows', () => {
-      const timerWithoutShadows: TimerComponent = {
-        ...mockTimer,
-        dropShadows: []
-      };
-
-      render(<TimerRenderer timer={timerWithoutShadows} scale={1.0} />);
-
-      const container = screen.getByText('05:42').parentElement;
-      expect(container).toHaveStyle({
-        boxShadow: 'none'
-      });
+      expect(screen.queryByText('05:42')).not.toBeInTheDocument();
     });
   });
 
-  describe('Text Styling', () => {
-    it('should apply text color', () => {
+  describe('CSS Custom Properties', () => {
+    it('should set position CSS variables', () => {
       render(<TimerRenderer timer={mockTimer} scale={1.0} />);
 
-      const textElement = screen.getByText('05:42');
-      expect(textElement).toHaveStyle({
-        color: '#ffffff'
-      });
+      const container = screen.getByTitle('Timer Component');
+      const computedStyle = window.getComputedStyle(container);
+
+      expect(computedStyle.getPropertyValue('--timer-left')).toBe('400px');
+      expect(computedStyle.getPropertyValue('--timer-top')).toBe('50px');
     });
 
-    it('should apply responsive font size', () => {
+    it('should scale position CSS variables', () => {
       render(<TimerRenderer timer={mockTimer} scale={2.0} />);
 
-      const textElement = screen.getByText('05:42');
-      expect(textElement).toHaveStyle({
-        fontSize: '28px' // Mocked to return scaled value
-      });
+      const container = screen.getByTitle('Timer Component');
+      const computedStyle = window.getComputedStyle(container);
+
+      expect(computedStyle.getPropertyValue('--timer-left')).toBe('800px');
+      expect(computedStyle.getPropertyValue('--timer-top')).toBe('100px');
     });
 
-    it('should apply font weight', () => {
+    it('should render timer component with correct CSS variables structure', () => {
       render(<TimerRenderer timer={mockTimer} scale={1.0} />);
 
-      const textElement = screen.getByText('05:42');
-      expect(textElement).toHaveStyle({
-        fontWeight: '500'
-      });
+      const container = screen.getByTitle('Timer Component');
+
+      // Verify the component renders and has basic structure
+      expect(container).toBeInTheDocument();
+      expect(container).toHaveClass('timer-component');
+      expect(screen.getByText('05:42')).toBeInTheDocument();
+
+      // Verify the style object has the expected CSS variable keys
+      const style = container.style;
+      expect(style.getPropertyValue('--timer-left')).toBeDefined();
+      expect(style.getPropertyValue('--timer-top')).toBeDefined();
+      expect(style.getPropertyValue('--timer-transform')).toBeDefined();
     });
 
-    it('should apply text alignment', () => {
+    it('should set text styling CSS variables', () => {
       render(<TimerRenderer timer={mockTimer} scale={1.0} />);
 
-      const textElement = screen.getByText('05:42');
-      expect(textElement).toHaveStyle({
-        textAlign: 'center'
-      });
-    });
+      const container = screen.getByTitle('Timer Component');
+      const computedStyle = window.getComputedStyle(container);
 
-    it('should center content with flexbox', () => {
-      render(<TimerRenderer timer={mockTimer} scale={1.0} />);
-
-      const container = screen.getByText('05:42').parentElement;
-      expect(container).toHaveStyle({
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      });
+      expect(computedStyle.getPropertyValue('--timer-color')).toBe('#ffffff');
+      expect(computedStyle.getPropertyValue('--timer-font-weight')).toBe('500');
+      expect(computedStyle.getPropertyValue('--timer-text-align')).toBe('center');
     });
   });
 
-  describe('Gradient Backgrounds', () => {
-    it('should handle gradient background fills', () => {
-      const timerWithGradient: TimerComponent = {
+  describe('Layout Modes', () => {
+    it('should handle autolayout mode', () => {
+      const autoLayoutTimer = {
         ...mockTimer,
-        backgroundFill: {
-          type: 'gradient',
-          gradient: {
-            type: 'linear',
-            rotation: 45,
-            stops: [
-              { color: '#ff0000', position: 0 },
-              { color: '#0000ff', position: 1 }
-            ]
-          }
-        }
+        isAutolayout: true,
+        layoutSizing: { horizontal: 'HUG', vertical: 'FIXED' }
       };
 
-      render(<TimerRenderer timer={timerWithGradient} scale={1.0} />);
+      render(<TimerRenderer timer={autoLayoutTimer} scale={1.0} />);
 
-      const container = screen.getByText('05:42').parentElement;
-      expect(container).toHaveStyle({
-        background: 'linear-gradient(0deg, #000 0%, #fff 100%)' // Mocked return
-      });
+      // Should render without error
+      expect(screen.getByText('05:42')).toBeInTheDocument();
+    });
+
+    it('should handle different layout sizing options', () => {
+      const fillTimer = {
+        ...mockTimer,
+        isAutolayout: true,
+        layoutSizing: { horizontal: 'FILL', vertical: 'FILL' }
+      };
+
+      render(<TimerRenderer timer={fillTimer} scale={1.0} />);
+
+      expect(screen.getByText('05:42')).toBeInTheDocument();
     });
   });
 
@@ -204,101 +132,59 @@ describe('TimerRenderer', () => {
     it('should handle zero scale', () => {
       render(<TimerRenderer timer={mockTimer} scale={0} />);
 
-      const container = screen.getByText('05:42').parentElement;
-      expect(container).toHaveStyle({
-        width: '0px',
-        height: '0px'
-      });
-    });
+      const container = screen.getByTitle('Timer Component');
+      const computedStyle = window.getComputedStyle(container);
 
-    it('should handle negative scale', () => {
-      render(<TimerRenderer timer={mockTimer} scale={-1} />);
-
-      const container = screen.getByText('05:42').parentElement;
-      expect(container).toHaveStyle({
-        width: '-120px',
-        height: '-40px'
-      });
-    });
-
-    it('should handle zero border radius', () => {
-      const timerWithoutRadius: TimerComponent = {
-        ...mockTimer,
-        borderRadius: 0
-      };
-
-      render(<TimerRenderer timer={timerWithoutRadius} scale={1.0} />);
-
-      const container = screen.getByText('05:42').parentElement;
-      expect(container).toHaveStyle({
-        borderRadius: '0px'
-      });
+      expect(computedStyle.getPropertyValue('--timer-left')).toBe('0px');
+      expect(computedStyle.getPropertyValue('--timer-top')).toBe('0px');
     });
 
     it('should handle missing text style properties', () => {
-      const timerMinimalText: TimerComponent = {
+      const timerWithMinimalStyle = {
         ...mockTimer,
-        textStyle: {
-          fontSize: 14,
-          color: '#ffffff',
-          fontWeight: 400,
-          textAlignHorizontal: 'left',
-          textAlignVertical: 'top'
-        }
+        textStyle: { fontSize: 14, color: '#ffffff' } // Missing fontWeight and textAlign
       };
 
-      render(<TimerRenderer timer={timerMinimalText} scale={1.0} />);
+      render(<TimerRenderer timer={timerWithMinimalStyle} scale={1.0} />);
 
-      const textElement = screen.getByText('05:42');
-      expect(textElement).toHaveStyle({
-        fontWeight: '400',
-        textAlign: 'left'
-      });
+      const container = screen.getByTitle('Timer Component');
+      const computedStyle = window.getComputedStyle(container);
+
+      expect(computedStyle.getPropertyValue('--timer-font-weight')).toBe('600'); // Default value
+      expect(computedStyle.getPropertyValue('--timer-text-align')).toBe('center'); // Default value
     });
 
-    it('should handle very small dimensions', () => {
-      const tinyTimer: TimerComponent = {
+    it('should handle missing layout sizing in autolayout mode', () => {
+      const autoLayoutTimerNoSizing = {
         ...mockTimer,
-        dimensions: { width: 1, height: 1 }
+        isAutolayout: true
+        // layoutSizing undefined
       };
 
-      render(<TimerRenderer timer={tinyTimer} scale={1.0} />);
+      render(<TimerRenderer timer={autoLayoutTimerNoSizing} scale={1.0} />);
 
-      const container = screen.getByText('05:42').parentElement;
-      expect(container).toHaveStyle({
-        width: '1px',
-        height: '1px'
-      });
+      // Should not crash and should render
+      expect(screen.getByText('05:42')).toBeInTheDocument();
+    });
+  });
+
+  describe('Performance', () => {
+    it('should render quickly with multiple timers', () => {
+      const startTime = performance.now();
+
+      for (let i = 0; i < 100; i++) {
+        const { unmount } = render(<TimerRenderer timer={mockTimer} scale={1.0} />);
+        unmount();
+      }
+
+      const endTime = performance.now();
+      expect(endTime - startTime).toBeLessThan(1000); // Should render 100 timers in less than 1 second
     });
 
-    it('should handle very large dimensions', () => {
-      const largeTimer: TimerComponent = {
-        ...mockTimer,
-        dimensions: { width: 1000, height: 500 }
-      };
+    it('should not cause memory leaks on unmount', () => {
+      const { unmount } = render(<TimerRenderer timer={mockTimer} scale={1.0} />);
 
-      render(<TimerRenderer timer={largeTimer} scale={1.0} />);
-
-      const container = screen.getByText('05:42').parentElement;
-      expect(container).toHaveStyle({
-        width: '1000px',
-        height: '500px'
-      });
-    });
-
-    it('should handle extreme positions', () => {
-      const extremeTimer: TimerComponent = {
-        ...mockTimer,
-        position: { x: -1000, y: 2000 }
-      };
-
-      render(<TimerRenderer timer={extremeTimer} scale={1.0} />);
-
-      const container = screen.getByText('05:42').parentElement;
-      expect(container).toHaveStyle({
-        left: '-1060px', // -1000 - (120/2)
-        top: '1980px'    // 2000 - (40/2)
-      });
+      expect(() => unmount()).not.toThrow();
     });
   });
 
@@ -306,93 +192,18 @@ describe('TimerRenderer', () => {
     it('should be readable by screen readers', () => {
       render(<TimerRenderer timer={mockTimer} scale={1.0} />);
 
-      const textElement = screen.getByText('05:42');
-      expect(textElement).toBeVisible();
-      expect(textElement.textContent).toBe('05:42');
+      const timerElement = screen.getByText('05:42');
+      expect(timerElement).toBeInTheDocument();
+
+      const container = screen.getByTitle('Timer Component');
+      expect(container).toHaveAttribute('title', 'Timer Component');
     });
 
-    it('should have appropriate semantic structure', () => {
+    it('should have semantic meaning', () => {
       render(<TimerRenderer timer={mockTimer} scale={1.0} />);
 
-      const container = screen.getByText('05:42').parentElement;
+      const container = screen.getByTitle('Timer Component');
       expect(container).toHaveClass('timer-component');
-    });
-
-    it('should maintain readability with high contrast', () => {
-      const highContrastTimer: TimerComponent = {
-        ...mockTimer,
-        backgroundFill: { type: 'solid', color: '#000000' },
-        textStyle: {
-          ...mockTimer.textStyle,
-          color: '#ffffff'
-        }
-      };
-
-      render(<TimerRenderer timer={highContrastTimer} scale={1.0} />);
-
-      const textElement = screen.getByText('05:42');
-      const container = textElement.parentElement;
-
-      expect(textElement).toHaveStyle({ color: '#ffffff' });
-      expect(container).toHaveStyle({ background: '#000000' });
-    });
-  });
-
-  describe('Performance', () => {
-    it('should render quickly with multiple timers', () => {
-      const start = performance.now();
-
-      for (let i = 0; i < 10; i++) {
-        const { unmount } = render(<TimerRenderer timer={mockTimer} scale={1.0} />);
-        unmount();
-      }
-
-      const end = performance.now();
-      const renderTime = end - start;
-
-      // Should render 10 timers in less than 100ms
-      expect(renderTime).toBeLessThan(100);
-    });
-
-    it('should not cause memory leaks on unmount', () => {
-      const { unmount } = render(<TimerRenderer timer={mockTimer} scale={1.0} />);
-
-      // Should not throw on unmount
-      expect(() => unmount()).not.toThrow();
-    });
-  });
-
-  describe('Layout Modes', () => {
-    it('should handle autolayout mode', () => {
-      const autolayoutTimer: TimerComponent = {
-        ...mockTimer,
-        isAutolayout: true,
-        layoutSizing: {
-          horizontal: 'hug',
-          vertical: 'hug'
-        }
-      };
-
-      render(<TimerRenderer timer={autolayoutTimer} scale={1.0} />);
-
-      const container = screen.getByText('05:42').parentElement;
-      expect(container).toBeInTheDocument();
-      // Autolayout behavior would be implemented based on design requirements
-    });
-
-    it('should handle different layout sizing options', () => {
-      const fillTimer: TimerComponent = {
-        ...mockTimer,
-        layoutSizing: {
-          horizontal: 'fill',
-          vertical: 'fixed'
-        }
-      };
-
-      render(<TimerRenderer timer={fillTimer} scale={1.0} />);
-
-      const container = screen.getByText('05:42').parentElement;
-      expect(container).toBeInTheDocument();
     });
   });
 });

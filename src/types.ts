@@ -3,7 +3,7 @@
 // Component state types
 export type QuestState = 'locked' | 'active' | 'unclaimed' | 'completed';
 export type HeaderState = 'active' | 'success' | 'fail';
-export type RewardsState = 'active' | 'fail' | 'claimed';
+export type RewardsState = 'active' | 'fail' | 'claimed' | 'unclaimed';
 export type ButtonState = 'default' | 'disabled' | 'hover' | 'active';
 
 // Fill and styling types
@@ -41,10 +41,10 @@ export interface Stroke {
 export interface Quest {
   questKey: string;
   stateBounds: {
-    locked: QuestBounds;
-    active: QuestBounds;
-    unclaimed: QuestBounds;
-    completed: QuestBounds;
+    locked: ImageBounds;
+    active: ImageBounds;
+    unclaimed: ImageBounds;
+    completed: ImageBounds;
   };
   lockedImg?: string;
   activeImg?: string;
@@ -52,11 +52,12 @@ export interface Quest {
   completedImg?: string;
 }
 
-export interface QuestBounds {
+// Base interface for image-based component positioning
+export interface ImageBounds {
   x: number;
   y: number;
-  w: number;
-  h: number;
+  width: number;
+  height: number;
   rotation?: number;
 }
 
@@ -94,41 +95,27 @@ export interface TimerComponent {
 // Header component
 export interface HeaderComponent {
   stateBounds: {
-    active: HeaderBounds;
-    success: HeaderBounds;
-    fail: HeaderBounds;
+    active: ImageBounds;
+    success: ImageBounds;
+    fail: ImageBounds;
   };
   activeImg: string;
   successImg: string;
   failImg: string;
 }
 
-export interface HeaderBounds {
-  centerX: number;
-  bottomY: number;
-  width: number;
-  height: number;
-  rotation?: number;
-}
-
 // Rewards component
 export interface RewardsComponent {
   stateBounds: {
-    active: RewardsBounds;
-    fail: RewardsBounds;
-    claimed: RewardsBounds;
+    active: ImageBounds;
+    fail: ImageBounds;
+    claimed: ImageBounds;
+    unclaimed: ImageBounds;
   };
   activeImg: string;
   failImg: string;
   claimedImg: string;
-}
-
-export interface RewardsBounds {
-  centerX: number;
-  centerY: number;
-  width: number;
-  height: number;
-  rotation?: number;
+  unclaimedImg: string;
 }
 
 // Button component
@@ -220,11 +207,6 @@ export interface ExtractedAssets {
     active?: string;
     fail?: string;
     claimed?: string;
+    unclaimed?: string;
   };
-}
-
-// Legacy types for backward compatibility (deprecated)
-export interface QuestlineData extends QuestlineExport {}
-export interface QuestState_Legacy {
-  [questKey: string]: QuestState;
 }

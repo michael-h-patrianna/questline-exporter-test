@@ -1,36 +1,25 @@
 # Beast Mode Knowledge
 
-## Assumptions
-- Position.json is part of the ZIP file structure imported for questline preview
-- Configuration covers visual properties for quest rendering
-- Current implementation covers basic component rendering but may miss advanced properties
+## Core Understanding
+- This is a React TypeScript questline component demo/library
+- State-driven UI with complex interactive components
+- Uses hooks pattern for state management (useQuestlineState)
+- Component-based architecture with renderers pattern
 
-## Decisions
-- Focus on visual configuration properties (layout, positioning, colors, images, gradients, strokes)
-- Review both current implementation and potential gaps
-- Prioritize missing features that affect visual fidelity
+## Key Decisions
+- Centralized state management through custom hook (confidence: high)
+- TypeScript for type safety across questline components (confidence: high)
+- Component renderer pattern for modularity (confidence: high)
+- Testing strategy includes unit, integration, and performance tests (confidence: high)
 
 ## Context Notes
-- Project uses React/TypeScript for questline viewer with comprehensive TypeScript interfaces
-- ZIP files contain quest assets and position.json configuration
-- Current implementation supports: Quests, Timer, Header, Rewards, Button components
-- State management through React Context with cycling interactions
-- Responsive scaling and positioning utilities implemented
+- Project has substantial test coverage (coverage/ directory exists)
+- Uses Jest for testing framework
+- Has build pipeline with example exports
+- Focus on questline/gamification UI components
+- State cycling is core functionality (locked→active→unclaimed→completed)
 
-## Key Findings from Source Review
-- **Comprehensive Types**: All major configuration options are defined in types.ts
-- **Position Utils**: Advanced utilities for scaling, positioning, gradients, shadows
-- **Component Renderers**: Full implementation for all component types
-- **State Management**: Complete state cycling and interaction handling
-- **Asset Loading**: ZIP extraction and blob URL management
-
-## Potential Gaps Identified
-- Some advanced styling properties may not be fully utilized
-- Complex animations or transitions not implemented
-- Advanced layout properties (auto-layout specifics)
-- Some Figma-specific features may not translate to web perfectly
-
-## Sources/Links
-- upgrade-guide.md (comprehensive format documentation)
-- Source code in /src directory (full implementation)
-- TypeScript interfaces define complete schema
+## Sources
+- Project structure analysis
+- useQuestlineState.ts examination
+- Package.json and build artifacts review

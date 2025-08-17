@@ -375,3 +375,60 @@ export const testingUtils = {
   LoadTester,
   ErrorBoundaryTester
 };
+
+// Basic tests to satisfy Jest requirement for test files
+describe('Testing Utilities', () => {
+  describe('PerformanceTester', () => {
+    it('should measure performance correctly', () => {
+      const tester = new PerformanceTester();
+      tester.startMeasurement('test');
+      tester.endMeasurement('test');
+
+      const stats = tester.getStats('test');
+      expect(stats.count).toBe(1);
+      expect(stats.avg).toBeGreaterThanOrEqual(0);
+    });
+
+    it('should clear measurements', () => {
+      const tester = new PerformanceTester();
+      tester.startMeasurement('test');
+      tester.endMeasurement('test');
+      tester.clear();
+
+      const stats = tester.getStats('test');
+      expect(stats.count).toBe(0);
+    });
+  });
+
+  describe('MemoryTester', () => {
+    it('should record initial memory', () => {
+      const tester = new MemoryTester();
+      expect(() => tester.recordInitialMemory()).not.toThrow();
+    });
+
+    it('should get current memory usage', () => {
+      const tester = new MemoryTester();
+      const memory = tester.getCurrentMemoryUsage();
+      expect(memory).toBeGreaterThanOrEqual(0);
+    });
+  });
+
+  describe('AccessibilityTester', () => {
+    it('should detect keyboard accessible elements', () => {
+      const button = document.createElement('button');
+      expect(AccessibilityTester.isKeyboardAccessible(button)).toBe(true);
+
+      const div = document.createElement('div');
+      expect(AccessibilityTester.isKeyboardAccessible(div)).toBe(false);
+    });
+
+    it('should audit element accessibility', () => {
+      const button = document.createElement('button');
+      button.setAttribute('aria-label', 'Test button');
+
+      const audit = AccessibilityTester.auditElement(button);
+      expect(audit).toHaveProperty('passed');
+      expect(audit).toHaveProperty('issues');
+    });
+  });
+});

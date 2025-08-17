@@ -1,20 +1,28 @@
 import { cleanup, render } from '@testing-library/react';
 import { QuestlineViewer } from '../../components/QuestlineViewer';
 import {
-    AccessibilityTester,
-    LoadTester,
-    MemoryTester,
-    PerformanceTester
+  AccessibilityTester,
+  LoadTester,
+  MemoryTester,
+  PerformanceTester
 } from '../utils/testingUtils';
 
 // Mock the utility functions for performance tests
-jest.mock('../../utils/positionUtils', () => ({
-  calculateScale: jest.fn(() => ({
+jest.mock('../../utils/utils', () => ({
+  calculateQuestlineScale: jest.fn(() => ({
     scale: 1.0,
     actualWidth: 800,
     actualHeight: 600,
     offsetX: 0,
     offsetY: 0
+  })),
+  convertFillToCSS: jest.fn(() => 'rgba(0,0,0,0.5)'),
+  convertShadowsToCSS: jest.fn(() => '0px 2px 4px rgba(0,0,0,0.1)'),
+  calculateQuestlineContentBounds: jest.fn(() => ({
+    minX: 0,
+    maxX: 800,
+    minY: 0,
+    maxY: 600
   }))
 }));
 

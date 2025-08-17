@@ -1,4 +1,6 @@
 /* Questline Viewer Component Styles */
+
+/* Main Container Layout */
 .questline-container-wrapper {
   position: relative;
   display: flex;
@@ -7,34 +9,53 @@
   padding: 20px;
   min-height: 300px;
   background-color: var(--pf-surface, #f5f5f5);
+  /* Container size is controlled by questline dimensions + padding */
+  width: calc(var(--questline-width, 800px) + 40px);
+  height: calc(var(--questline-height, 600px) + 40px);
 }
 
+/* Main Questline Canvas */
 .questline-viewer {
   position: relative;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  /* Dimensions set via CSS custom properties */
+  width: var(--questline-width, 800px);
+  height: var(--questline-height, 600px);
   border: 2px solid var(--pf-border, #ddd);
   border-radius: 8px;
   overflow: visible;
   box-shadow: var(--elev-1, 0 4px 12px rgba(0,0,0,0.1));
 }
 
-/* Background image optimization */
-.questline-background-image {
+/* Content Bounds Indicator (Development/Debug Feature) */
+.content-bounds-indicator {
+  position: absolute;
+  left: var(--content-bounds-left, 0);
+  top: var(--content-bounds-top, 0);
+  width: var(--content-bounds-width, 100%);
+  height: var(--content-bounds-height, 100%);
+  border: 2px dotted #ff6b35;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.7;
+}
+
+/* Background Image Handling */
+.questline-background {
   position: absolute;
   top: 0;
   left: 0;
-  object-fit: fill;
-  z-index: -1;
+  width: 100%;
+  height: 100%;
+  z-index: 0; /* Changed from -1 to 0 to ensure it's visible */
   pointer-events: none;
+}
 
-  /* Image quality optimizations */
-  image-rendering: -webkit-optimize-contrast;
+.questline-background-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   image-rendering: crisp-edges;
-  image-rendering: pixelated;
-
-  /* Performance optimizations */
   transform: translateZ(0);
   will-change: transform;
   -webkit-backface-visibility: hidden;
@@ -52,12 +73,6 @@
   cursor: pointer;
   transition: transform 0.15s ease;
   z-index: 10;
-
-  /* Performance optimizations */
-  transform: translateZ(0);
-  will-change: transform;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
 }
 
 .quest-image {
@@ -66,11 +81,6 @@
   object-fit: contain;
   pointer-events: none;
   user-select: none;
-
-  /* Image quality optimizations */
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
-  image-rendering: pixelated;
 }
 
 .quest-fallback {
@@ -119,12 +129,6 @@
   cursor: pointer;
   transition: transform 0.15s ease;
   z-index: 20;
-
-  /* Performance optimizations */
-  transform: translateZ(0);
-  will-change: transform;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
 }
 
 .header-image {
@@ -133,11 +137,6 @@
   object-fit: contain;
   pointer-events: none;
   user-select: none;
-
-  /* Image quality optimizations */
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
-  image-rendering: pixelated;
 }
 
 .header-fallback {
@@ -167,12 +166,6 @@
   cursor: pointer;
   transition: transform 0.15s ease;
   z-index: 15;
-
-  /* Performance optimizations */
-  transform: translateZ(0);
-  will-change: transform;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
 }
 
 .rewards-image {
@@ -181,11 +174,6 @@
   object-fit: contain;
   pointer-events: none;
   user-select: none;
-
-  /* Image quality optimizations */
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
-  image-rendering: pixelated;
 }
 
 .rewards-fallback {
@@ -226,11 +214,6 @@
   font-weight: var(--timer-font-weight);
   text-align: var(--timer-text-align);
   z-index: 25;
-
-  /* Performance optimizations */
-  will-change: transform;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
 }
 
 /* Button Component */
@@ -285,5 +268,5 @@
 
 .quest-item:hover {
   opacity: 0.9;
-  transform: scale(1.02);
+  transform: scale(1.4);
 }

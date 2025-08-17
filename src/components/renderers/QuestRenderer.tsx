@@ -1,12 +1,34 @@
+/**
+ * QuestRenderer Component
+ *
+ * PURPOSE: Displays quest images from theme ZIP files
+ *
+ * This component renders quest images extracted from theme ZIP files.
+ * Users can click to cycle through different visual states to preview
+ * how the quest looks in each state.
+ *
+ * What this does:
+ * - Displays quest image for current visual state
+ * - Clicking cycles through: locked → active → unclaimed → completed → locked
+ * - Positions using x,y coordinates from ZIP data
+ * - Scales image based on provided scale factor
+ */
+
 import React from 'react';
-import { QuestState } from '../../types';
+import { Quest, QuestState } from '../../types';
 
 interface QuestRendererProps {
-  quest: any;
+  /** Quest data from ZIP file including bounds for each state */
+  quest: Quest;
+  /** Current visual state being displayed */
   currentState: QuestState;
+  /** Scale factor for responsive sizing */
   scale: number;
+  /** Quest image URL for current state */
   questImage?: string;
+  /** Whether to show quest key overlay for debugging */
   showQuestKeys?: boolean;
+  /** Function called when user clicks to cycle to next state */
   onCycleState: (questKey: string) => void;
 }
 
@@ -18,39 +40,81 @@ export const QuestRenderer: React.FC<QuestRendererProps> = ({
   showQuestKeys = false,
   onCycleState
 }) => {
-  // Safely handle missing quest data
+
+  // ============================================================================
+  // DATA VALIDATION & SAFETY
+  // ============================================================================
+
+  /**
+   * Validate quest data from ZIP file
+   */
   if (!quest?.questKey || !quest?.stateBounds) {
+    console.warn('QuestRenderer: Invalid quest data', { quest, currentState });
     return null;
   }
 
+  /**
+   * Get positioning data for current state
+   */
   const bounds = quest.stateBounds[currentState];
 
-  // Handle missing bounds for the current state
   if (!bounds) {
+    console.warn(`QuestRenderer: Missing bounds for state "${currentState}"`, { quest });
     return null;
   }
 
-  const getQuestStateColor = (state: QuestState): string => {
-    const colorMap: Record<QuestState, string> = {
-      'locked': '#666666',
-      'active': '#ffaa00',
-      'unclaimed': '#00aa00',
-      'completed': '#0066aa'
-    };
-    return colorMap[state];
+  // ============================================================================
+  // DIMENSION & POSITION CALCULATIONS
+  // ============================================================================
+
+  /**
+   * Calculate scaled dimensions directly from bounds
+   * All scaling happens here for clarity in this demo
+   */
+  const width = bounds.width * scale;
+  const height = bounds.height * scale;
+
+  /**
+   * Create CSS positioning variables
+   * Quests use x,y coordinates from ZIP data (center positioning)
+   */
+  const cssVariables: Record<string, string> = {
+    // Position: x,y - convert to top-left for CSS
+    '--quest-left': `${(bounds.x * scale) - (width / 2)}px`,
+    '--quest-top': `${(bounds.y * scale) - (height / 2)}px`,
+
+    // Scaled dimensions
+    '--quest-width': `${width}px`,
+    '--quest-height': `${height}px`,
+
+    // Optional rotation
+    '--quest-transform': bounds.rotation ? `rotate(${bounds.rotation}deg)` : 'none'
   };
 
-  // Create CSS variables for position.json styles
-  // Quest uses top-left positioning (x, y are top-left coordinates)
-  const cssVariables: Record<string, string> = {
-    '--quest-left': `${bounds.x * scale}px`,
-    '--quest-top': `${bounds.y * scale}px`,
-    '--quest-width': `${bounds.w * scale}px`,
-    '--quest-height': `${bounds.h * scale}px`,
-    '--quest-transform': bounds.rotation ? `rotate(${bounds.rotation}deg)` : 'none',
-    '--quest-fallback-bg': getQuestStateColor(currentState),
-    '--quest-fallback-font-size': `${Math.max(8, bounds.w * scale * 0.15)}px`
+  // ============================================================================
+  // EVENT HANDLING
+  // ============================================================================
+
+  /**
+   * Handle click to cycle to next visual state
+   */
+  const handleClick = () => {
+    onCycleState(quest.questKey);
   };
+
+  /**
+   * Handle keyboard interaction for accessibility
+   */
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleClick();
+    }
+  };
+
+  // ============================================================================
+  // RENDER COMPONENT
+  // ============================================================================
 
   return (
     <div
@@ -60,36 +124,24 @@ export const QuestRenderer: React.FC<QuestRendererProps> = ({
       data-quest-state={currentState}
       role="button"
       tabIndex={0}
-      aria-label={`Quest ${quest.questKey} - ${currentState}`}
+      aria-label={`Quest ${quest.questKey} - ${currentState} visual state`}
       style={cssVariables}
-      onClick={() => onCycleState(quest.questKey)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onCycleState(quest.questKey);
-        }
-      }}
-      title={`${quest.questKey} (${currentState})`}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      title={`${quest.questKey} (${currentState}) - Click to cycle states`}
     >
-      {questImage ? (
-        <>
-          <img
-            src={questImage}
-            alt={`${quest.questKey} - ${currentState}`}
-            className="quest-image"
-            draggable={false}
-          />
-          {showQuestKeys && (
-            <div className="quest-key-overlay">
-              {quest.questKey}
-            </div>
-          )}
-        </>
-      ) : (
-        <div className="quest-fallback">
+      {/* Display quest image for current state */}
+      <img
+        src={questImage}
+        alt={`${quest.questKey} in ${currentState} visual state`}
+        className="quest-image"
+        draggable={false}
+      />
+
+      {/* Optional quest key overlay for debugging */}
+      {showQuestKeys && (
+        <div className="quest-key-overlay">
           {quest.questKey}
-          <br />
-          <small>{currentState}</small>
         </div>
       )}
     </div>

@@ -47,7 +47,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Questline Demo - New Format</h1>
+        <h1>Questline Demo</h1>
         <p>Upload a ZIP file exported from the latest Figma Questline Plugin</p>
       </header>
 
@@ -68,7 +68,7 @@ function App() {
         {extractedAssets && (
           <>
             <div className="controls-section">
-              <h3>Questline Dimensions</h3>
+
               <div className="control-row">
                 <div className="control-group">
                   <label>
@@ -95,34 +95,30 @@ function App() {
                   </label>
                 </div>
               </div>
-              
-              <h3>Display Options</h3>
-              <div className="control-row">
-                <div className="control-group">
-                  <label>
+
+
+
+            </div>
+
+            {/* Main questline viewer */}
+            <div className="questline-container">
+              {/* Debug info overlay */}
+
+                <div className="debug-overlay">
+
+
+                              <div className="control-group">
+                  <label >
                     <input
+
                       type="checkbox"
                       checked={showQuestKeys}
                       onChange={(e) => setShowQuestKeys(e.target.checked)}
                     />
                     Show Quest Keys
                   </label>
-                </div>
-              </div>
-            </div>
+                </div></div>
 
-            {/* Main questline viewer */}
-            <div className="questline-container">
-              {/* Debug info overlay */}
-              {process.env.NODE_ENV === 'development' && (
-                <div className="debug-overlay">
-                  <div>Questline: {extractedAssets.questlineData.questlineId}</div>
-                  <div>Frame: {extractedAssets.questlineData.frameSize.width}×{extractedAssets.questlineData.frameSize.height}</div>
-                  <div>Requested: {questlineWidth}×{questlineHeight}</div>
-                  <div>Quests: {extractedAssets.questlineData.quests.length}</div>
-                  <div>Components: Timer:{extractedAssets.questlineData.timer ? '✓' : '✗'} | Header:{extractedAssets.questlineData.header ? '✓' : '✗'} | Rewards:{extractedAssets.questlineData.rewards ? '✓' : '✗'} | Button:{extractedAssets.questlineData.button ? '✓' : '✗'}</div>
-                </div>
-              )}
 
               <QuestlineViewer
                 questlineData={extractedAssets.questlineData}
@@ -172,7 +168,7 @@ function App() {
                 <strong>Interaction Guide:</strong><br />
                 • Click quests to cycle: locked → active → unclaimed → completed<br />
                 • Click header to cycle: active → success → fail<br />
-                • Click rewards to cycle: active → fail → claimed<br />
+                • Click rewards to cycle: active → fail → unclaimed → claimed<br />
                 • Hover/click button to see different states
               </p>
             </div>

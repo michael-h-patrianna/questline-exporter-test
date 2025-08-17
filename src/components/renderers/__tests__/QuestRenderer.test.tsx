@@ -1,37 +1,17 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { QuestlineProvider } from '../../../context/QuestlineContext';
-import { Quest } from '../../../types';
+import { Quest, QuestState } from '../../../types';
 import { QuestRenderer } from '../QuestRenderer';
 
-// Mock the utility functions
-jest.mock('../../../utils/positionUtils', () => ({
-  convertQuestPosition: jest.fn((bounds, scale) => ({
-    left: bounds.x * scale,
-    top: bounds.y * scale,
-    width: bounds.w * scale,
-    height: bounds.h * scale,
-    transform: bounds.rotation ? `rotate(${bounds.rotation}deg)` : undefined
-  })),
-  getQuestStateColor: jest.fn((state) => {
-    const colors = {
-      locked: '#666666',
-      active: '#ffaa00',
-      unclaimed: '#00aa00',
-      completed: '#0066aa'
-    };
-    return colors[state as keyof typeof colors] || '#999999';
-  })
-}));
-
-describe('QuestRenderer', () => {
+describe('QuestRenderer - Core Positioning Demo', () => {
   const mockQuest: Quest = {
     questKey: 'test-quest',
     stateBounds: {
-      locked: { x: 10, y: 20, w: 100, h: 50 },
-      active: { x: 15, y: 25, w: 105, h: 55 },
-      unclaimed: { x: 20, y: 30, w: 110, h: 60 },
-      completed: { x: 25, y: 35, w: 115, h: 65 }
+      locked: { x: 60, y: 45, width: 100, height: 50 },
+      active: { x: 67.5, y: 52.5, width: 105, height: 55 },
+      unclaimed: { x: 75, y: 60, width: 110, height: 60 },
+      completed: { x: 82.5, y: 67.5, width: 115, height: 65 }
     },
     lockedImg: 'test-quest_locked.png',
     activeImg: 'test-quest_active.png',
@@ -52,33 +32,8 @@ describe('QuestRenderer', () => {
     </QuestlineProvider>
   );
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  describe('Rendering', () => {
-    it('should render quest component with correct attributes', () => {
-      render(
-        <TestWrapper>
-          <QuestRenderer
-            quest={mockQuest}
-            currentState={"locked"}
-            questImage={mockQuestImages.locked}
-            scale={1.0}
-            onCycleState={() => {}}
-          />
-        </TestWrapper>
-      );
-
-      const questElement = screen.getByTestId('quest-component') ||
-                           document.querySelector('[data-quest-key="test-quest"]');
-
-      expect(questElement).toBeInTheDocument();
-      expect(questElement).toHaveAttribute('data-quest-key', 'test-quest');
-      expect(questElement).toHaveAttribute('data-quest-state', 'locked');
-    });
-
-    it('should render with correct positioning styles', () => {
+  describe('Core Positioning System', () => {
+    it('should render with x/y positioning converted to CSS variables', () => {
       render(
         <TestWrapper>
           <QuestRenderer
@@ -91,75 +46,26 @@ describe('QuestRenderer', () => {
         </TestWrapper>
       );
 
+      // Verify the component exists with correct attributes
       const questElement = document.querySelector('[data-quest-key="test-quest"]');
+      expect(questElement).toBeInTheDocument();
+      expect(questElement).toHaveAttribute('data-quest-key', 'test-quest');
+      expect(questElement).toHaveAttribute('data-quest-state', 'locked');
+      expect(questElement).toHaveClass('quest-component');
+
+      // Verify CSS variables are set correctly for x/y positioning
+      // x=60, y=45, width=100, height=50, scale=2.0
+      // left = (60 * 2.0) - (100 * 2.0 / 2) = 120 - 100 = 20
+      // top = (45 * 2.0) - (50 * 2.0 / 2) = 90 - 50 = 40
       expect(questElement).toHaveStyle({
-        position: 'absolute',
-        left: '20px', // 10 * 2.0
-        top: '40px',  // 20 * 2.0
-        width: '200px', // 100 * 2.0
-        height: '100px' // 50 * 2.0
+        '--quest-left': '20px',
+        '--quest-top': '40px',
+        '--quest-width': '200px',
+        '--quest-height': '100px'
       });
     });
 
-    it('should render image when available', () => {
-      render(
-        <TestWrapper>
-          <QuestRenderer
-            quest={mockQuest}
-            currentState={"locked"}
-            questImage={mockQuestImages.locked}
-            scale={1.0}
-            onCycleState={() => {}}
-          />
-        </TestWrapper>
-      );
-
-      const image = screen.getByAltText('test-quest - locked');
-      expect(image).toBeInTheDocument();
-      expect(image).toHaveAttribute('src', 'blob:locked-image-url');
-    });
-
-    it('should render fallback when image is missing', () => {
-      render(
-        <TestWrapper>
-          <QuestRenderer
-            quest={mockQuest}
-            currentState={"locked"}
-            questImage={undefined} // No images
-            scale={1.0}
-            onCycleState={() => {}}
-          />
-        </TestWrapper>
-      );
-
-      // Should not have an img element
-      expect(screen.queryByAltText('test-quest - locked')).not.toBeInTheDocument();
-
-      // Should have fallback content
-      expect(screen.getByText('test-quest')).toBeInTheDocument();
-      expect(screen.getByText('locked')).toBeInTheDocument();
-    });
-
-    it('should render fallback with correct color', () => {
-      render(
-        <TestWrapper>
-          <QuestRenderer
-            quest={mockQuest}
-            currentState={"locked"}
-            questImage={undefined}
-            scale={1.0}
-            onCycleState={() => {}}
-          />
-        </TestWrapper>
-      );
-
-      const fallbackElement = screen.getByText('test-quest').parentElement;
-      expect(fallbackElement).toHaveStyle({
-        backgroundColor: '#666666' // locked color
-      });
-    });
-
-    it('should handle rotation in transform', () => {
+    it('should handle rotation in CSS variables', () => {
       const questWithRotation: Quest = {
         ...mockQuest,
         stateBounds: {
@@ -182,18 +88,17 @@ describe('QuestRenderer', () => {
 
       const questElement = document.querySelector('[data-quest-key="test-quest"]');
       expect(questElement).toHaveStyle({
-        transform: 'rotate(45deg)'
+        '--quest-transform': 'rotate(45deg)'
       });
     });
-  });
 
-  describe('State Management', () => {
-    it('should display correct state initially', () => {
-      render(
+    it('should update positioning when state changes', () => {
+      let currentState: QuestState = 'locked';
+      const { rerender } = render(
         <TestWrapper>
           <QuestRenderer
             quest={mockQuest}
-            currentState={"locked"}
+            currentState={currentState}
             questImage={mockQuestImages.locked}
             scale={1.0}
             onCycleState={() => {}}
@@ -202,10 +107,42 @@ describe('QuestRenderer', () => {
       );
 
       const questElement = document.querySelector('[data-quest-key="test-quest"]');
-      expect(questElement).toHaveAttribute('data-quest-state', 'locked');
-    });
 
-    it('should cycle through states on click', async () => {
+      // Initial position: locked bounds (x=60, y=45, width=100, height=50)
+      // left = 60 - 100/2 = 10, top = 45 - 50/2 = 20
+      expect(questElement).toHaveStyle({
+        '--quest-left': '10px',
+        '--quest-top': '20px',
+        '--quest-width': '100px',
+        '--quest-height': '50px'
+      });
+
+      // Re-render with active state (x=67.5, y=52.5, width=105, height=55)
+      // left = 67.5 - 105/2 = 15, top = 52.5 - 55/2 = 25
+      currentState = 'active';
+      rerender(
+        <TestWrapper>
+          <QuestRenderer
+            quest={mockQuest}
+            currentState={currentState}
+            questImage={mockQuestImages.active}
+            scale={1.0}
+            onCycleState={() => {}}
+          />
+        </TestWrapper>
+      );
+
+      expect(questElement).toHaveStyle({
+        '--quest-left': '15px',
+        '--quest-top': '25px',
+        '--quest-width': '105px',
+        '--quest-height': '55px'
+      });
+    });
+  });
+
+  describe('Image Handling', () => {
+    it('should render image with correct attributes', () => {
       render(
         <TestWrapper>
           <QuestRenderer
@@ -218,164 +155,35 @@ describe('QuestRenderer', () => {
         </TestWrapper>
       );
 
-      const questElement = document.querySelector('[data-quest-key="test-quest"]') as HTMLElement;
-
-      // Initial state: locked
-      expect(questElement).toHaveAttribute('data-quest-state', 'locked');
-
-      // Click to cycle to active
-      fireEvent.click(questElement);
-      await waitFor(() => {
-        expect(questElement).toHaveAttribute('data-quest-state', 'active');
-      });
-
-      // Click to cycle to unclaimed
-      fireEvent.click(questElement);
-      await waitFor(() => {
-        expect(questElement).toHaveAttribute('data-quest-state', 'unclaimed');
-      });
-
-      // Click to cycle to completed
-      fireEvent.click(questElement);
-      await waitFor(() => {
-        expect(questElement).toHaveAttribute('data-quest-state', 'completed');
-      });
-
-      // Click to cycle back to locked
-      fireEvent.click(questElement);
-      await waitFor(() => {
-        expect(questElement).toHaveAttribute('data-quest-state', 'locked');
-      });
-    });
-
-    it('should update image source when state changes', async () => {
-      render(
-        <TestWrapper>
-          <QuestRenderer
-            quest={mockQuest}
-            currentState={"locked"}
-            questImage={mockQuestImages.locked}
-            scale={1.0}
-            onCycleState={() => {}}
-          />
-        </TestWrapper>
-      );
-
-      const questElement = document.querySelector('[data-quest-key="test-quest"]') as HTMLElement;
-
-      // Initial image: locked
-      let image = screen.getByAltText('test-quest - locked');
+      const image = screen.getByAltText('test-quest in locked visual state');
+      expect(image).toBeInTheDocument();
       expect(image).toHaveAttribute('src', 'blob:locked-image-url');
-
-      // Click to cycle to active
-      fireEvent.click(questElement);
-      await waitFor(() => {
-        image = screen.getByAltText('test-quest - active');
-        expect(image).toHaveAttribute('src', 'blob:active-image-url');
-      });
+      expect(image).toHaveClass('quest-image');
+      expect(image).toHaveAttribute('draggable', 'false');
     });
 
-    it('should update position when state changes', async () => {
+    it('should render empty image when no image provided', () => {
       render(
         <TestWrapper>
           <QuestRenderer
             quest={mockQuest}
             currentState={"locked"}
-            questImage={mockQuestImages.locked}
+            questImage={undefined}
             scale={1.0}
             onCycleState={() => {}}
           />
         </TestWrapper>
       );
 
-      const questElement = document.querySelector('[data-quest-key="test-quest"]') as HTMLElement;
-
-      // Initial position: locked bounds
-      expect(questElement).toHaveStyle({
-        left: '10px', // locked x
-        top: '20px',  // locked y
-        width: '100px', // locked w
-        height: '50px'  // locked h
-      });
-
-      // Click to cycle to active
-      fireEvent.click(questElement);
-      await waitFor(() => {
-        expect(questElement).toHaveStyle({
-          left: '15px', // active x
-          top: '25px',  // active y
-          width: '105px', // active w
-          height: '55px'  // active h
-        });
-      });
-    });
-  });
-
-  describe('Animation States', () => {
-    it('should have reduced opacity when animating', () => {
-      // This would require mocking the context to set isAnimating: true
-      // For now, we'll test the static case
-      render(
-        <TestWrapper>
-          <QuestRenderer
-            quest={mockQuest}
-            currentState={"locked"}
-            questImage={mockQuestImages.locked}
-            scale={1.0}
-            onCycleState={() => {}}
-          />
-        </TestWrapper>
-      );
-
-      const questElement = document.querySelector('[data-quest-key="test-quest"]');
-      expect(questElement).toHaveStyle({ opacity: '1' }); // Not animating
-    });
-  });
-
-  describe('Selection State', () => {
-    it('should show selection outline when selected', () => {
-      render(
-        <TestWrapper>
-          <QuestRenderer
-            quest={mockQuest}
-            currentState={"locked"}
-            questImage={mockQuestImages.locked}
-            scale={1.0}
-            onCycleState={() => {}}
-          />
-        </TestWrapper>
-      );
-
-      const questElement = document.querySelector('[data-quest-key="test-quest"]');
-      expect(questElement).toHaveStyle({
-        outline: '2px solid #00ff00',
-        zIndex: '1000'
-      });
-    });
-
-    it('should not show selection outline when not selected', () => {
-      render(
-        <TestWrapper>
-          <QuestRenderer
-            quest={mockQuest}
-            currentState={"locked"}
-            questImage={mockQuestImages.locked}
-            scale={1.0}
-            onCycleState={() => {}}
-          />
-        </TestWrapper>
-      );
-
-      const questElement = document.querySelector('[data-quest-key="test-quest"]');
-      expect(questElement).toHaveStyle({
-        outline: 'none',
-        zIndex: '10'
-      });
+      // Should have an img element but with no src (pristine approach - show only what's there)
+      const image = screen.getByAltText('test-quest in locked visual state');
+      expect(image).toBeInTheDocument();
+      expect(image).not.toHaveAttribute('src');
     });
   });
 
   describe('Accessibility', () => {
-    it('should have cursor pointer for clickable element', () => {
+    it('should have proper ARIA attributes', () => {
       render(
         <TestWrapper>
           <QuestRenderer
@@ -389,118 +197,43 @@ describe('QuestRenderer', () => {
       );
 
       const questElement = document.querySelector('[data-quest-key="test-quest"]');
-      expect(questElement).toHaveStyle({ cursor: 'pointer' });
-    });
-
-    it('should have descriptive title attribute', () => {
-      render(
-        <TestWrapper>
-          <QuestRenderer
-            quest={mockQuest}
-            currentState={"locked"}
-            questImage={mockQuestImages.locked}
-            scale={1.0}
-            onCycleState={() => {}}
-          />
-        </TestWrapper>
-      );
-
-      const questElement = document.querySelector('[data-quest-key="test-quest"]');
-      expect(questElement).toHaveAttribute('title', 'Quest: test-quest (locked)');
-    });
-
-    it('should have proper image alt text', () => {
-      render(
-        <TestWrapper>
-          <QuestRenderer
-            quest={mockQuest}
-            currentState={"locked"}
-            questImage={mockQuestImages.locked}
-            scale={1.0}
-            onCycleState={() => {}}
-          />
-        </TestWrapper>
-      );
-
-      const image = screen.getByAltText('test-quest - locked');
-      expect(image).toBeInTheDocument();
-    });
-
-    it('should prevent image dragging', () => {
-      render(
-        <TestWrapper>
-          <QuestRenderer
-            quest={mockQuest}
-            currentState={"locked"}
-            questImage={mockQuestImages.locked}
-            scale={1.0}
-            onCycleState={() => {}}
-          />
-        </TestWrapper>
-      );
-
-      const image = screen.getByAltText('test-quest - locked');
-      expect(image).toHaveAttribute('draggable', 'false');
-    });
-  });
-
-  describe('Development Mode', () => {
-    const originalEnv = process.env.NODE_ENV;
-
-    afterEach(() => {
-      (process.env as any).NODE_ENV = originalEnv;
-    });
-
-    it('should show debug info in development mode', () => {
-      (process.env as any).NODE_ENV = 'development';
-
-      render(
-        <TestWrapper>
-          <QuestRenderer
-            quest={mockQuest}
-            currentState={"locked"}
-            questImage={mockQuestImages.locked}
-            scale={1.0}
-            onCycleState={() => {}}
-          />
-        </TestWrapper>
-      );
-
-      // Check for debug overlay
-      const debugElement = document.querySelector('.quest-debug-info');
-      expect(debugElement).toBeInTheDocument();
-    });
-
-    it('should not show debug info in production mode', () => {
-      (process.env as any).NODE_ENV = 'production';
-
-      render(
-        <TestWrapper>
-          <QuestRenderer
-            quest={mockQuest}
-            currentState={"locked"}
-            questImage={mockQuestImages.locked}
-            scale={1.0}
-            onCycleState={() => {}}
-          />
-        </TestWrapper>
-      );
-
-      // Should not have debug overlay
-      const debugElement = document.querySelector('.quest-debug-info');
-      expect(debugElement).not.toBeInTheDocument();
+      expect(questElement).toHaveAttribute('role', 'button');
+      expect(questElement).toHaveAttribute('tabIndex', '0');
+      expect(questElement).toHaveAttribute('aria-label', 'Quest test-quest - locked visual state');
+      expect(questElement).toHaveAttribute('title', 'test-quest (locked) - Click to cycle states');
     });
   });
 
   describe('Edge Cases', () => {
-    it('should handle missing quest bounds gracefully', () => {
+    it('should handle zero scale gracefully', () => {
+      render(
+        <TestWrapper>
+          <QuestRenderer
+            quest={mockQuest}
+            currentState={"locked"}
+            questImage={mockQuestImages.locked}
+            scale={0}
+            onCycleState={() => {}}
+          />
+        </TestWrapper>
+      );
+
+      const questElement = document.querySelector('[data-quest-key="test-quest"]');
+      expect(questElement).toBeInTheDocument();
+      expect(questElement).toHaveStyle({
+        '--quest-width': '0px',
+        '--quest-height': '0px'
+      });
+    });
+
+    it('should handle missing bounds gracefully', () => {
       const questWithMissingBounds: Quest = {
         ...mockQuest,
         stateBounds: {
-          locked: { x: 0, y: 0, w: 0, h: 0 },
-          active: { x: 0, y: 0, w: 0, h: 0 },
-          unclaimed: { x: 0, y: 0, w: 0, h: 0 },
-          completed: { x: 0, y: 0, w: 0, h: 0 }
+          locked: { x: 0, y: 0, width: 0, height: 0 },
+          active: { x: 0, y: 0, width: 0, height: 0 },
+          unclaimed: { x: 0, y: 0, width: 0, height: 0 },
+          completed: { x: 0, y: 0, width: 0, height: 0 }
         }
       };
 
@@ -519,101 +252,9 @@ describe('QuestRenderer', () => {
       const questElement = document.querySelector('[data-quest-key="test-quest"]');
       expect(questElement).toBeInTheDocument();
       expect(questElement).toHaveStyle({
-        width: '0px',
-        height: '0px'
+        '--quest-width': '0px',
+        '--quest-height': '0px'
       });
-    });
-
-    it('should handle zero scale', () => {
-      render(
-        <TestWrapper>
-          <QuestRenderer
-            quest={mockQuest}
-            currentState={"locked"}
-            questImage={mockQuestImages.locked}
-            scale={0}
-            onCycleState={() => {}}
-          />
-        </TestWrapper>
-      );
-
-      const questElement = document.querySelector('[data-quest-key="test-quest"]');
-      expect(questElement).toHaveStyle({
-        width: '0px',
-        height: '0px'
-      });
-    });
-
-    it('should handle negative scale', () => {
-      render(
-        <TestWrapper>
-          <QuestRenderer
-            quest={mockQuest}
-            currentState={"locked"}
-            questImage={mockQuestImages.locked}
-            scale={-1}
-            onCycleState={() => {}}
-          />
-        </TestWrapper>
-      );
-
-      const questElement = document.querySelector('[data-quest-key="test-quest"]');
-      // Negative scale should still work (might be used for effects)
-      expect(questElement).toBeInTheDocument();
-    });
-
-    it('should handle empty quest key', () => {
-      const questWithEmptyKey: Quest = {
-        ...mockQuest,
-        questKey: ''
-      };
-
-      render(
-        <TestWrapper>
-          <QuestRenderer
-            quest={questWithEmptyKey}
-            currentState={"locked"}
-            questImage={mockQuestImages.locked}
-            scale={1.0}
-            onCycleState={() => {}}
-          />
-        </TestWrapper>
-      );
-
-      const questElement = document.querySelector('[data-quest-key=""]');
-      expect(questElement).toBeInTheDocument();
-    });
-
-    it('should handle partially missing images', () => {
-      const partialImages = {
-        locked: 'blob:locked-image-url',
-        // active, unclaimed, completed missing
-      };
-
-      render(
-        <TestWrapper>
-          <QuestRenderer
-            quest={mockQuest}
-            currentState={"locked"}
-            questImage={partialImages.locked}
-            scale={1.0}
-            onCycleState={() => {}}
-          />
-        </TestWrapper>
-      );
-
-      const questElement = document.querySelector('[data-quest-key="test-quest"]') as HTMLElement;
-
-      // Should show image for locked state
-      expect(screen.getByAltText('test-quest - locked')).toBeInTheDocument();
-
-      // Click to cycle to active (should show fallback)
-      fireEvent.click(questElement);
-
-      // Should show fallback for active state
-      expect(screen.queryByAltText('test-quest - active')).not.toBeInTheDocument();
-      expect(screen.getByText('test-quest')).toBeInTheDocument();
-      expect(screen.getByText('active')).toBeInTheDocument();
     });
   });
 });

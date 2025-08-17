@@ -1,28 +1,80 @@
-import React, { useCallback, useState } from 'react';
-import { ButtonState, ExtractedAssets, HeaderState, QuestlineExport, QuestState, RewardsState } from '../types';
+/**
+ * QuestlineViewer - Main Questline Display Component
+ *
+ * This component serves as the primary coordinator for displaying questline content.
+ * It handles the overall layout, scaling, and orchestrates the rendering of all
+ * questline components (quests, timer, header, rewards, button).
+ *
+ * Key Responsibilities:
+ * - Calculate responsive scaling for questline display
+ * - Coordinate component rendering using specialized renderer components
+ * - Provide container structure and background rendering
+ * - Handle component bounds calculation for overflow management
+ *
+ * Architecture Pattern:
+ * This component follows a "coordinator pattern" where it manages layout and
+ * delegates specific rendering responsibilities to specialized renderer components.
+ * State management is handled by the useQuestlineState hook to maintain separation
+ * of concerns.
+ *
+ * Usage:
+ * The QuestlineViewer is designed to be a standalone, reusable component that can
+ * be integrated into any React application. It handles all internal questline
+ * logic while providing callback props for external integration.
+ */
+
+import React from 'react';
+import { ExtractedAssets, QuestlineExport } from '../types';
 import './QuestlineViewer.css';
+
+// Import specialized renderer components
 import { ButtonRenderer } from './renderers/ButtonRenderer';
 import { HeaderRenderer } from './renderers/HeaderRenderer';
 import { QuestRenderer } from './renderers/QuestRenderer';
 import { RewardsRenderer } from './renderers/RewardsRenderer';
 import { TimerRenderer } from './renderers/TimerRenderer';
 
+// Import separated concerns
+import { useQuestlineState } from '../hooks/useQuestlineState';
+import {
+  calculateQuestlineContentBounds,
+  calculateQuestlineScale
+} from '../utils/utils';
+
+/**
+ * QuestlineViewer Props Interface
+ *
+ * Defines the external API for the QuestlineViewer component.
+ * This interface represents what external applications need to provide
+ * to integrate questline display functionality.
+ */
 interface QuestlineViewerProps {
+  /** Questline export data from Figma plugin */
   questlineData: QuestlineExport;
+
+  /** Extracted assets including images and background */
   assets: ExtractedAssets;
+
+  /** Target display width for the questline */
   questlineWidth: number;
+
+  /** Target display height for the questline */
   questlineHeight: number;
+
+  /** Whether to show quest key overlays for debugging/development */
   showQuestKeys?: boolean;
+
+  /** Callback function executed when questline button is clicked */
   onButtonClick?: () => void;
 }
 
-interface ComponentState {
-  questStates: Record<string, QuestState>;
-  headerState: HeaderState;
-  rewardsState: RewardsState;
-  buttonState: ButtonState;
-}
-
+/**
+ * QuestlineViewer - Main Questline Display Component
+ *
+ * This component coordinates the display of an entire questline, including
+ * all interactive components. It uses the useQuestlineState hook for state
+ * management and specialized renderer components for display logic.
+ */
 export const QuestlineViewer: React.FC<QuestlineViewerProps> = ({
   questlineData,
   assets,
@@ -31,205 +83,103 @@ export const QuestlineViewer: React.FC<QuestlineViewerProps> = ({
   showQuestKeys = false,
   onButtonClick
 }) => {
-  // Initialize state with error handling
-  const [componentState, setComponentState] = useState<ComponentState>(() => {
-    // Safely handle malformed questline data
-    const validQuests = Array.isArray(questlineData?.quests) ? questlineData.quests : [];
 
-    return {
-      questStates: validQuests.reduce((acc, quest) => {
-        if (quest?.questKey) {
-          acc[quest.questKey] = 'locked';
-        }
-        return acc;
-      }, {} as Record<string, QuestState>),
-      headerState: 'active',
-      rewardsState: 'active',
-      buttonState: 'default'
-    };
-  });
+  // ============================================================================
+  // STATE MANAGEMENT (Delegated to Hook)
+  // ============================================================================
 
-  // Get original frame dimensions from questline data
-  const originalWidth = questlineData.frameSize?.width || 800;
-  const originalHeight = questlineData.frameSize?.height || 600;
+  /**
+   * All questline state management is handled by the useQuestlineState hook.
+   * This separation allows developers to easily understand and modify state
+   * behavior without touching rendering logic.
+   */
+  const {
+    questStates,
+    headerState,
+    rewardsState,
+    buttonState,
+    cycleQuestState,
+    cycleHeaderState,
+    cycleRewardsState,
+    handleButtonMouseEnter,
+    handleButtonMouseLeave,
+    handleButtonClick
+  } = useQuestlineState(questlineData);
 
-  // Calculate scale based on desired questline size vs original size
-  const scaleX = questlineWidth / originalWidth;
-  const scaleY = questlineHeight / originalHeight;
+  // ============================================================================
+  // LAYOUT & SCALING CALCULATIONS (Delegated to Transform Utils)
+  // ============================================================================
 
-  // Use uniform scaling to maintain aspect ratio (take the smaller scale)
-  const scale = Math.min(scaleX, scaleY);
-
-  // Calculate actual scaled dimensions (may be smaller than requested to maintain aspect ratio)
-  const scaledWidth = originalWidth * scale;
-  const scaledHeight = originalHeight * scale;
-
-  // Calculate content bounds including overflow
-  const calculateContentBounds = () => {
-    let minX = 0, minY = 0, maxX = originalWidth, maxY = originalHeight;
-
-    // Check quest bounds
-    if (Array.isArray(questlineData?.quests)) {
-      questlineData.quests.forEach(quest => {
-        if (quest?.stateBounds) {
-          Object.values(quest.stateBounds).forEach(bounds => {
-            if (bounds) {
-              minX = Math.min(minX, bounds.x);
-              minY = Math.min(minY, bounds.y);
-              maxX = Math.max(maxX, bounds.x + bounds.w);
-              maxY = Math.max(maxY, bounds.y + bounds.h);
-            }
-          });
-        }
-      });
-    }
-
-    // Check timer bounds
-    if (questlineData.timer) {
-      const timer = questlineData.timer;
-      const width = timer.dimensions.width;
-      const height = timer.dimensions.height;
-      const left = timer.position.x - (width / 2);
-      const top = timer.position.y - (height / 2);
-
-      minX = Math.min(minX, left);
-      minY = Math.min(minY, top);
-      maxX = Math.max(maxX, left + width);
-      maxY = Math.max(maxY, top + height);
-    }
-
-    // Check header bounds
-    if (questlineData.header) {
-      Object.values(questlineData.header.stateBounds).forEach(bounds => {
-        if (bounds) {
-          const width = bounds.width;
-          const height = bounds.height;
-          const left = bounds.centerX - (width / 2);
-          const top = bounds.bottomY - height;
-
-          minX = Math.min(minX, left);
-          minY = Math.min(minY, top);
-          maxX = Math.max(maxX, left + width);
-          maxY = Math.max(maxY, top + height);
-        }
-      });
-    }
-
-    // Check rewards bounds
-    if (questlineData.rewards) {
-      Object.values(questlineData.rewards.stateBounds).forEach(bounds => {
-        if (bounds) {
-          const width = bounds.width;
-          const height = bounds.height;
-          const left = bounds.centerX - (width / 2);
-          const top = bounds.centerY - (height / 2);
-
-          minX = Math.min(minX, left);
-          minY = Math.min(minY, top);
-          maxX = Math.max(maxX, left + width);
-          maxY = Math.max(maxY, top + height);
-        }
-      });
-    }
-
-    // Check button bounds
-    if (questlineData.button) {
-      const width = 160; // estimated button width
-      const height = 60; // estimated button height
-      const left = questlineData.button.position.x - (width / 2);
-      const top = questlineData.button.position.y - (height / 2);
-
-      minX = Math.min(minX, left);
-      minY = Math.min(minY, top);
-      maxX = Math.max(maxX, left + width);
-      maxY = Math.max(maxY, top + height);
-    }
-
-    // Scale the bounds to match the display scale
-    return {
-      minX: minX * scale,
-      minY: minY * scale,
-      maxX: maxX * scale,
-      maxY: maxY * scale,
-      width: (maxX - minX) * scale,
-      height: (maxY - minY) * scale
-    };
-  };  const contentBounds = calculateContentBounds();
-
-  // Quest state cycling
-  const cycleQuestState = useCallback((questKey: string) => {
-    const currentState = componentState.questStates[questKey] || 'locked';
-    const stateOrder: QuestState[] = ['locked', 'active', 'unclaimed', 'completed'];
-    const currentIndex = stateOrder.indexOf(currentState);
-    const nextState = stateOrder[(currentIndex + 1) % stateOrder.length];
-
-    setComponentState(prev => ({
-      ...prev,
-      questStates: {
-        ...prev.questStates,
-        [questKey]: nextState
-      }
-    }));
-  }, [componentState.questStates]);
-
-  // Header state cycling
-  const cycleHeaderState = useCallback(() => {
-    const stateOrder: HeaderState[] = ['active', 'success', 'fail'];
-    const currentIndex = stateOrder.indexOf(componentState.headerState);
-    const nextState = stateOrder[(currentIndex + 1) % stateOrder.length];
-
-    setComponentState(prev => ({ ...prev, headerState: nextState }));
-  }, [componentState.headerState]);
-
-  // Rewards state cycling
-  const cycleRewardsState = useCallback(() => {
-    const stateOrder: RewardsState[] = ['active', 'fail', 'claimed'];
-    const currentIndex = stateOrder.indexOf(componentState.rewardsState);
-    const nextState = stateOrder[(currentIndex + 1) % stateOrder.length];
-
-    setComponentState(prev => ({ ...prev, rewardsState: nextState }));
-  }, [componentState.rewardsState]);
-
-  // Button handlers
-  const handleButtonMouseEnter = () => {
-    if (componentState.buttonState === 'default') {
-      setComponentState(prev => ({ ...prev, buttonState: 'hover' }));
-    }
+  /**
+   * Calculate responsive scaling for the questline display.
+   * This ensures the questline maintains proper aspect ratios while fitting
+   * within the requested display dimensions.
+   */
+  const originalSize = {
+    width: questlineData.frameSize?.width || 800,
+    height: questlineData.frameSize?.height || 600
   };
 
-  const handleButtonMouseLeave = () => {
-    if (componentState.buttonState === 'hover') {
-      setComponentState(prev => ({ ...prev, buttonState: 'default' }));
-    }
+  const targetSize = {
+    width: questlineWidth,
+    height: questlineHeight
   };
 
-  const handleButtonClick = () => {
-    setComponentState(prev => ({ ...prev, buttonState: 'active' }));
-    setTimeout(() => {
-      setComponentState(prev => ({ ...prev, buttonState: 'default' }));
-    }, 150);
-    onButtonClick?.();
+  const { scale, scaledWidth, scaledHeight } = calculateQuestlineScale(originalSize, targetSize);
+
+  /**
+   * Calculate content bounds to handle components that might extend beyond
+   * the original frame boundaries. This is important for proper overflow
+   * handling and scroll area calculations.
+   */
+  const contentBounds = calculateQuestlineContentBounds(
+    questlineData,
+    questStates,
+    headerState,
+    rewardsState,
+    scale
+  );
+
+  // ============================================================================
+  // COMPONENT RENDERING FUNCTIONS
+  // ============================================================================
+
+  /**
+   * Render Quest Components
+   *
+   * Iterates through all quests and renders them using the QuestRenderer.
+   * Each quest maintains its own state and handles its own click interactions.
+   */
+  const renderQuests = () => {
+    if (!Array.isArray(questlineData?.quests)) return null;
+
+    return questlineData.quests.map((quest) => {
+      // Skip invalid quests
+      if (!quest?.questKey || !quest?.stateBounds) return null;
+
+      const currentState = questStates[quest.questKey] || 'locked';
+      const questImage = assets?.questImages?.[quest.questKey]?.[currentState];
+
+      return (
+        <QuestRenderer
+          key={quest.questKey}
+          quest={quest}
+          currentState={currentState}
+          scale={scale}
+          questImage={questImage}
+          showQuestKeys={showQuestKeys}
+          onCycleState={cycleQuestState}
+        />
+      );
+    });
   };
 
-  // Render Quest Component
-  const renderQuest = (quest: any) => {
-    const currentState = componentState.questStates[quest.questKey] || 'locked';
-    const questImage = assets?.questImages?.[quest.questKey]?.[currentState];
-
-    return (
-      <QuestRenderer
-        key={quest.questKey}
-        quest={quest}
-        currentState={currentState}
-        scale={scale}
-        questImage={questImage}
-        showQuestKeys={showQuestKeys}
-        onCycleState={cycleQuestState}
-      />
-    );
-  };
-
-  // Render Timer Component
+  /**
+   * Render Timer Component
+   *
+   * Displays the questline timer if present in the questline data.
+   * Timer rendering uses the TimerRenderer for consistent styling.
+   */
   const renderTimer = () => {
     if (!questlineData.timer) return null;
 
@@ -241,17 +191,21 @@ export const QuestlineViewer: React.FC<QuestlineViewerProps> = ({
     );
   };
 
-  // Render Header Component
+  /**
+   * Render Header Component
+   *
+   * Displays the questline header with state-based image selection.
+   * Header states cycle through active -> success -> fail.
+   */
   const renderHeader = () => {
     if (!questlineData.header) return null;
 
-    const currentState = componentState.headerState;
-    const headerImage = assets?.headerImages?.[currentState];
+    const headerImage = assets?.headerImages?.[headerState];
 
     return (
       <HeaderRenderer
         header={questlineData.header}
-        currentState={currentState}
+        currentState={headerState}
         scale={scale}
         headerImage={headerImage}
         onCycleState={cycleHeaderState}
@@ -259,17 +213,21 @@ export const QuestlineViewer: React.FC<QuestlineViewerProps> = ({
     );
   };
 
-  // Render Rewards Component
+  /**
+   * Render Rewards Component
+   *
+   * Displays the questline rewards with state-based image selection.
+   * Rewards states cycle through active -> fail -> claimed.
+   */
   const renderRewards = () => {
     if (!questlineData.rewards) return null;
 
-    const currentState = componentState.rewardsState;
-    const rewardsImage = assets?.rewardsImages?.[currentState];
+    const rewardsImage = assets?.rewardsImages?.[rewardsState];
 
     return (
       <RewardsRenderer
         rewards={questlineData.rewards}
-        currentState={currentState}
+        currentState={rewardsState}
         scale={scale}
         rewardsImage={rewardsImage}
         onCycleState={cycleRewardsState}
@@ -277,91 +235,74 @@ export const QuestlineViewer: React.FC<QuestlineViewerProps> = ({
     );
   };
 
-  // Render Button Component
+  /**
+   * Render Button Component
+   *
+   * Displays the interactive questline button with hover and click states.
+   * Button interactions are handled through the state management hook.
+   */
   const renderButton = () => {
     if (!questlineData.button) return null;
-
-    const currentState = componentState.buttonState;
 
     return (
       <ButtonRenderer
         button={questlineData.button}
-        currentState={currentState}
+        currentState={buttonState}
         scale={scale}
         onMouseEnter={handleButtonMouseEnter}
         onMouseLeave={handleButtonMouseLeave}
-        onClick={handleButtonClick}
+        onClick={() => handleButtonClick(onButtonClick)}
       />
     );
   };
+
+  // ============================================================================
+  // MAIN RENDER
+  // ============================================================================
+
 
   return (
     <div
       className="questline-container-wrapper"
       role="region"
       aria-label="Questline game interface"
-      style={{
-      width: scaledWidth + 40, // Add padding around questline
-      height: scaledHeight + 40, // Add padding around questline
-      position: 'relative',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: '20px',
-      backgroundColor: 'var(--pf-surface, #f5f5f5)'
-    }}>
+    >
       <div
         className="questline-viewer questline-canvas"
         role="img"
         aria-label="Interactive questline with clickable quests and components"
         style={{
-        width: scaledWidth,
-        height: scaledHeight,
-        position: 'relative',
-        backgroundImage: assets.backgroundImage ? `url(${assets.backgroundImage})` : undefined,
-        backgroundSize: `${scaledWidth}px ${scaledHeight}px`,
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        border: '2px solid var(--pf-border, #ddd)',
-        borderRadius: '8px',
-        overflow: 'visible',
-        boxShadow: 'var(--elev-1, 0 4px 12px rgba(0,0,0,0.1))'
-      }}>
-        {/* Content bounds indicator */}
-        <div
-          className="content-bounds"
-          style={{
-            position: 'absolute',
-            left: contentBounds.minX,
-            top: contentBounds.minY,
-            width: contentBounds.width,
-            height: contentBounds.height,
-            border: '2px dotted #ff6b35',
-            borderRadius: '4px',
-            pointerEvents: 'none',
-            zIndex: 1,
-            opacity: 0.7
-          }}
-          title="Content bounds including overflow"
-        />
+          '--questline-width': `${scaledWidth}px`,
+          '--questline-height': `${scaledHeight}px`,
+          '--content-bounds-left': `${contentBounds.minX}px`,
+          '--content-bounds-top': `${contentBounds.minY}px`,
+          '--content-bounds-width': `${contentBounds.width}px`,
+          '--content-bounds-height': `${contentBounds.height}px`
+        } as React.CSSProperties}
+      >
+
+        {/* Content bounds indicator for debugging/development */}
+        <div className="content-bounds-indicator" />
+
+        {/* Background image rendering */}
         {assets.backgroundImage && (
           <div className="questline-background">
             <img
               src={assets.backgroundImage}
               alt="Questline background"
               className="questline-background-image"
-              style={{
-                width: scaledWidth,
-                height: scaledHeight
-              }}
+              draggable={false}
             />
           </div>
         )}
+
+        {/* Render all questline components in layered order */}
         {renderTimer()}
         {renderHeader()}
         {renderRewards()}
-        {Array.isArray(questlineData?.quests) ? questlineData.quests.map(renderQuest) : null}
+        {renderQuests()}
         {renderButton()}
+
       </div>
     </div>
   );

@@ -3,13 +3,20 @@ import { ExtractedAssets, QuestlineExport } from '../../types';
 import { QuestlineViewer } from '../QuestlineViewer';
 
 // Mock the utility functions
-jest.mock('../../utils/positionUtils', () => ({
-  calculateScale: jest.fn(() => ({
+jest.mock('../../utils/utils', () => ({
+  ...jest.requireActual('../../utils/utils'),
+  calculateQuestlineScale: jest.fn(() => ({
     scale: 1.0,
-    actualWidth: 800,
-    actualHeight: 600,
-    offsetX: 0,
-    offsetY: 0
+    scaledWidth: 800,
+    scaledHeight: 600
+  })),
+  calculateQuestlineContentBounds: jest.fn(() => ({
+    minX: 0,
+    minY: 0,
+    maxX: 800,
+    maxY: 600,
+    width: 800,
+    height: 600
   }))
 }));
 
@@ -22,10 +29,10 @@ describe('QuestlineViewer Integration', () => {
       {
         questKey: 'quest1',
         stateBounds: {
-          locked: { x: 100, y: 100, w: 80, h: 60 },
-          active: { x: 105, y: 105, w: 85, h: 65 },
-          unclaimed: { x: 110, y: 110, w: 90, h: 70 },
-          completed: { x: 115, y: 115, w: 95, h: 75 }
+          locked: { x: 100, y: 100, width: 80, height: 60 },
+          active: { x: 105, y: 105, width: 85, height: 65 },
+          unclaimed: { x: 110, y: 110, width: 90, height: 70 },
+          completed: { x: 115, y: 115, width: 95, height: 75 }
         },
         lockedImg: 'quest1_locked.png',
         activeImg: 'quest1_active.png',
@@ -35,10 +42,10 @@ describe('QuestlineViewer Integration', () => {
       {
         questKey: 'quest2',
         stateBounds: {
-          locked: { x: 200, y: 200, w: 80, h: 60 },
-          active: { x: 205, y: 205, w: 85, h: 65 },
-          unclaimed: { x: 210, y: 210, w: 90, h: 70 },
-          completed: { x: 215, y: 215, w: 95, h: 75 }
+          locked: { x: 200, y: 200, width: 80, height: 60 },
+          active: { x: 205, y: 205, width: 85, height: 65 },
+          unclaimed: { x: 210, y: 210, width: 90, height: 70 },
+          completed: { x: 215, y: 215, width: 95, height: 75 }
         },
         lockedImg: 'quest2_locked.png',
         activeImg: 'quest2_active.png',
@@ -65,9 +72,9 @@ describe('QuestlineViewer Integration', () => {
     },
     header: {
       stateBounds: {
-        active: { centerX: 400, bottomY: 100, width: 300, height: 50 },
-        success: { centerX: 400, bottomY: 100, width: 300, height: 50 },
-        fail: { centerX: 400, bottomY: 100, width: 300, height: 50 }
+        active: { x: 400, y: 100, width: 300, height: 50 },
+        success: { x: 400, y: 100, width: 300, height: 50 },
+        fail: { x: 400, y: 100, width: 300, height: 50 }
       },
       activeImg: 'header_active.png',
       successImg: 'header_success.png',
@@ -75,13 +82,15 @@ describe('QuestlineViewer Integration', () => {
     },
     rewards: {
       stateBounds: {
-        active: { centerX: 600, centerY: 400, width: 150, height: 100 },
-        fail: { centerX: 600, centerY: 400, width: 150, height: 100 },
-        claimed: { centerX: 600, centerY: 400, width: 150, height: 100 }
+        active: { x: 600, y: 400, width: 150, height: 100 },
+        fail: { x: 600, y: 400, width: 150, height: 100 },
+        claimed: { x: 600, y: 400, width: 150, height: 100 },
+        unclaimed: { x: 600, y: 400, width: 150, height: 100 }
       },
       activeImg: 'rewards_active.png',
       failImg: 'rewards_fail.png',
-      claimedImg: 'rewards_claimed.png'
+      claimedImg: 'rewards_claimed.png',
+      unclaimedImg: 'rewards_unclaimed.png'
     },
     button: {
       position: { x: 400, y: 500 },
@@ -207,13 +216,19 @@ describe('QuestlineViewer Integration', () => {
         />
       );
 
+      // Verify background container exists with correct class
       const backgroundElement = document.querySelector('.questline-background');
       expect(backgroundElement).toBeInTheDocument();
+      expect(backgroundElement).toHaveClass('questline-background');
 
-      if (backgroundElement) {
-        const img = backgroundElement.querySelector('img');
-        expect(img).toHaveAttribute('src', 'blob:background-url');
-      }
+      // Verify background image exists with correct attributes
+      const backgroundImage = screen.getByAltText('Questline background');
+      expect(backgroundImage).toBeInTheDocument();
+      expect(backgroundImage).toHaveAttribute('src', 'blob:background-url');
+      expect(backgroundImage).toHaveClass('questline-background-image');
+
+      // Verify image is not draggable (should be purely decorative)
+      expect(backgroundImage).toHaveAttribute('draggable', 'false');
     });
 
     it('should handle missing background image gracefully', () => {
@@ -478,10 +493,10 @@ describe('QuestlineViewer Integration', () => {
         quests: Array.from({ length: 50 }, (_, i) => ({
           questKey: `quest${i}`,
           stateBounds: {
-            locked: { x: i * 20, y: i * 20, w: 80, h: 60 },
-            active: { x: i * 20 + 5, y: i * 20 + 5, w: 85, h: 65 },
-            unclaimed: { x: i * 20 + 10, y: i * 20 + 10, w: 90, h: 70 },
-            completed: { x: i * 20 + 15, y: i * 20 + 15, w: 95, h: 75 }
+            locked: { x: i * 20, y: i * 20, width: 80, height: 60 },
+            active: { x: i * 20 + 5, y: i * 20 + 5, width: 85, height: 65 },
+            unclaimed: { x: i * 20 + 10, y: i * 20 + 10, width: 90, height: 70 },
+            completed: { x: i * 20 + 15, y: i * 20 + 15, width: 95, height: 75 }
           },
           lockedImg: `quest${i}_locked.png`,
           activeImg: `quest${i}_active.png`,

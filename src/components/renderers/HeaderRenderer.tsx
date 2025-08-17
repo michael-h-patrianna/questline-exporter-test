@@ -1,11 +1,32 @@
 import React from 'react';
 import { HeaderState } from '../../types';
 
+/**
+ * HeaderRenderer Component
+ *
+ * PURPOSE: Displays header images from theme ZIP files
+ *
+ * This component renders header images extracted from theme ZIP files.
+ * Users can click to cycle through different visual states to preview
+ * how the header looks in each state.
+ *
+ * What this does:
+ * - Displays header image for current visual state
+ * - Clicking cycles through: active → success → fail → active
+ * - Positions using x,y coordinates from ZIP data
+ * - Scales image based on provided scale factor
+ */
+
 interface HeaderRendererProps {
+  /** Header data from ZIP file including position and bounds for each state */
   header: any;
+  /** Current visual state being displayed */
   currentState: HeaderState;
+  /** Scale factor for responsive sizing */
   scale: number;
+  /** Header image URL for current state */
   headerImage?: string;
+  /** Function called when user clicks to cycle to next state */
   onCycleState: () => void;
 }
 
@@ -16,32 +37,71 @@ export const HeaderRenderer: React.FC<HeaderRendererProps> = ({
   headerImage,
   onCycleState
 }) => {
+  // ============================================================================
+  // EARLY RETURNS & VALIDATION
+  // ============================================================================
+
   if (!header) return null;
 
   const bounds = header.stateBounds[currentState];
+  if (!bounds) return null;
+
+  // ============================================================================
+  // DIMENSION CALCULATION
+  // ============================================================================
+
+  /**
+   * Calculate scaled dimensions directly from bounds
+   * All scaling happens here for clarity in this demo
+   */
   const width = bounds.width * scale;
   const height = bounds.height * scale;
 
-  const getHeaderStateColor = (state: HeaderState): string => {
-    const colorMap: Record<HeaderState, string> = {
-      'active': '#4a90e2',
-      'success': '#7ed321',
-      'fail': '#d0021b'
-    };
-    return colorMap[state];
-  };
+  // ============================================================================
+  // CSS VARIABLES GENERATION
+  // ============================================================================
 
-  // Create CSS variables for position.json styles
-  // Header uses centerX, bottomY positioning - calculate center offset in JS
+  /**
+   * Create CSS positioning variables
+   * Headers use x,y coordinates from ZIP data (center positioning)
+   */
   const cssVariables: Record<string, string> = {
-    '--header-left': `${(bounds.centerX * scale) - (width / 2)}px`,
-    '--header-top': `${(bounds.bottomY * scale) - height}px`,
+    // Position: x,y - convert to top-left for CSS
+    '--header-left': `${(bounds.x * scale) - (width / 2)}px`,
+    '--header-top': `${(bounds.y * scale) - (height / 2)}px`,
+
+    // Scaled dimensions
     '--header-width': `${width}px`,
     '--header-height': `${height}px`,
-    '--header-transform': bounds.rotation ? `rotate(${bounds.rotation}deg)` : 'none',
-    '--header-fallback-bg': getHeaderStateColor(currentState),
-    '--header-fallback-font-size': `${Math.max(12, width * 0.08)}px`
+
+    // Optional rotation
+    '--header-transform': bounds.rotation ? `rotate(${bounds.rotation}deg)` : 'none'
   };
+
+  // ============================================================================
+  // HEADER CONTENT RENDERING
+  // ============================================================================
+
+  /**
+   * Display the header image for current state
+   */
+  const renderHeaderContent = () => {
+    return (
+      <img
+        src={headerImage}
+        alt={`Header in ${currentState} visual state`}
+        className="header-image"
+        draggable={false}
+        onError={(e) => {
+          console.warn('Header image failed to load:', headerImage);
+        }}
+      />
+    );
+  };
+
+  // ============================================================================
+  // RENDER COMPONENT
+  // ============================================================================
 
   return (
     <div
@@ -49,20 +109,18 @@ export const HeaderRenderer: React.FC<HeaderRendererProps> = ({
       data-header-state={currentState}
       style={cssVariables}
       onClick={onCycleState}
-      title={`Header (${currentState})`}
+      title={`Header Component (${currentState.toUpperCase()})`}
+      role="banner"
+      aria-label={`Header in ${currentState} state`}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onCycleState();
+        }
+      }}
     >
-      {headerImage ? (
-        <img
-          src={headerImage}
-          alt={`Header - ${currentState}`}
-          className="header-image"
-          draggable={false}
-        />
-      ) : (
-        <div className="header-fallback">
-          HEADER<br /><small>{currentState.toUpperCase()}</small>
-        </div>
-      )}
+      {renderHeaderContent()}
     </div>
   );
 };

@@ -51,10 +51,10 @@ describe('zipExtractor', () => {
       {
         questKey: 'quest1',
         stateBounds: {
-          locked: { x: 10, y: 20, w: 100, h: 50 },
-          active: { x: 15, y: 25, w: 105, h: 55 },
-          unclaimed: { x: 20, y: 30, w: 110, h: 60 },
-          completed: { x: 25, y: 35, w: 115, h: 65 }
+          locked: { x: 10, y: 20, width: 100, height: 50 },
+          active: { x: 15, y: 25, width: 105, height: 55 },
+          unclaimed: { x: 20, y: 30, width: 110, height: 60 },
+          completed: { x: 25, y: 35, width: 115, height: 65 }
         },
         lockedImg: 'quest1_locked.png',
         activeImg: 'quest1_active.png',
@@ -81,9 +81,9 @@ describe('zipExtractor', () => {
     },
     header: {
       stateBounds: {
-        active: { centerX: 400, bottomY: 100, width: 300, height: 50 },
-        success: { centerX: 400, bottomY: 100, width: 300, height: 50 },
-        fail: { centerX: 400, bottomY: 100, width: 300, height: 50 }
+        active: { x: 400, y: 100, width: 300, height: 50 },
+        success: { x: 400, y: 100, width: 300, height: 50 },
+        fail: { x: 400, y: 100, width: 300, height: 50 }
       },
       activeImg: 'header_active.png',
       successImg: 'header_success.png',
@@ -91,13 +91,15 @@ describe('zipExtractor', () => {
     },
     rewards: {
       stateBounds: {
-        active: { centerX: 600, centerY: 400, width: 150, height: 100 },
-        fail: { centerX: 600, centerY: 400, width: 150, height: 100 },
-        claimed: { centerX: 600, centerY: 400, width: 150, height: 100 }
+        active: { x: 600, y: 400, width: 150, height: 100 },
+        fail: { x: 600, y: 400, width: 150, height: 100 },
+        claimed: { x: 600, y: 400, width: 150, height: 100 },
+        unclaimed: { x: 600, y: 400, width: 150, height: 100 }
       },
       activeImg: 'rewards_active.png',
       failImg: 'rewards_fail.png',
-      claimedImg: 'rewards_claimed.png'
+      claimedImg: 'rewards_claimed.png',
+      unclaimedImg: 'rewards_unclaimed.png'
     },
     button: {
       position: { x: 400, y: 500 },
@@ -276,7 +278,8 @@ describe('zipExtractor', () => {
       expect(result.backgroundImage).toBeUndefined();
       expect(result.questImages.quest1.locked).toBeUndefined();
       expect(consoleWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Background image not found')
+        'Background image not found:',
+        'background.png'
       );
     });
 
@@ -500,7 +503,24 @@ describe('zipExtractor', () => {
 
   describe('memory management', () => {
     it('should call URL.createObjectURL for each image', async () => {
-      const questlineData = createMockQuestlineData();
+      // Create simplified questline data with fewer images
+      const questlineData = {
+        questlineId: 'test-questline',
+        frameSize: { width: 800, height: 600 },
+        background: { exportUrl: 'background.png' },
+        quests: [
+          {
+            questKey: 'quest1',
+            stateBounds: {
+              locked: { x: 10, y: 10, w: 80, h: 60 }
+            },
+            lockedImg: 'quest1_locked.png'
+          }
+        ],
+        exportedAt: new Date().toISOString(),
+        metadata: { totalQuests: 1, version: '1.0.0' }
+      };
+
       const mockZipFile = new File(['mock'], 'test.zip', { type: 'application/zip' });
 
       mockZip.files = {
@@ -523,7 +543,8 @@ describe('zipExtractor', () => {
 
       await extractQuestlineZip(mockZipFile);
 
-      // Should create blob URLs for background and quest1_locked
+      // Should create blob URLs for each PNG file found in the ZIP
+      // The test setup includes background.png and quest1_locked.png
       expect(global.URL.createObjectURL).toHaveBeenCalledTimes(2);
     });
   });
