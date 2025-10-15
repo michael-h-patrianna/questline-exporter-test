@@ -1,12 +1,18 @@
-// jest-dom adds custom jest matchers for asserting on DOM nodes.
-// allows you to do things like:
-// expect(element).toHaveTextContent(/react/i)
-// learn more: https://github.com/testing-library/jest-dom
-import '@testing-library/jest-dom';
+// Setup file for Vitest
+// Adds custom jest-dom matchers for asserting on DOM nodes
+// @testing-library/jest-dom adds custom matchers like:
+// - toBeInTheDocument()
+// - toHaveTextContent()
+// - toHaveClass()
+// Learn more: https://github.com/testing-library/jest-dom
+import '@testing-library/jest-dom/vitest';
+import { vi } from 'vitest';
 
 // Mock URL.createObjectURL and URL.revokeObjectURL for tests
-global.URL.createObjectURL = jest.fn((blob: Blob) => `blob:${blob.type}/${Math.random().toString(36)}`);
-global.URL.revokeObjectURL = jest.fn();
+global.URL.createObjectURL = vi.fn(
+  (blob: Blob) => `blob:${blob.type}/${Math.random().toString(36)}`
+);
+global.URL.revokeObjectURL = vi.fn();
 
 // Mock FileReader for ZIP processing tests
 global.FileReader = class FileReader {
@@ -29,7 +35,9 @@ global.FileReader = class FileReader {
 
   addEventListener(): void {}
   removeEventListener(): void {}
-  dispatchEvent(): boolean { return true; }
+  dispatchEvent(): boolean {
+    return true;
+  }
 
   static readonly EMPTY = 0;
   static readonly LOADING = 1;
@@ -49,8 +57,8 @@ beforeAll(() => {
     if (
       typeof args[0] === 'string' &&
       (args[0].includes('Warning:') ||
-       args[0].includes('Error:') ||
-       args[0].includes('React does not recognize'))
+        args[0].includes('Error:') ||
+        args[0].includes('React does not recognize'))
     ) {
       // Suppress React warnings in tests
       return;
@@ -76,26 +84,28 @@ afterAll(() => {
 });
 
 // Performance testing utilities
-global.performance = global.performance || {
-  now: jest.fn(() => Date.now()),
-  mark: jest.fn(),
-  measure: jest.fn(),
-  getEntriesByName: jest.fn(() => []),
-  getEntriesByType: jest.fn(() => []),
-  clearMarks: jest.fn(),
-  clearMeasures: jest.fn()
-} as any;
+global.performance =
+  global.performance ||
+  ({
+    now: vi.fn(() => Date.now()),
+    mark: vi.fn(),
+    measure: vi.fn(),
+    getEntriesByName: vi.fn(() => []),
+    getEntriesByType: vi.fn(() => []),
+    clearMarks: vi.fn(),
+    clearMeasures: vi.fn(),
+  } as any);
 
 // Mock ResizeObserver for responsive testing
-global.ResizeObserver = jest.fn().mockImplementation(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
 }));
 
 // Mock IntersectionObserver for visibility testing
-global.IntersectionObserver = jest.fn().mockImplementation(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
+global.IntersectionObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
 }));

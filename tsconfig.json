@@ -1,30 +1,69 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2020",
+    "useDefineForClassFields": true,
     "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
     ],
-    "allowJs": true,
+    "module": "ESNext",
     "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "module": "esnext",
-    "moduleResolution": "node",
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+
+    /* Additional options */
+    "allowJs": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* Path Aliases */
+    "baseUrl": ".",
+    "paths": {
+      "@lib": ["./src/lib/index.ts"],
+      "@lib-types": ["./src/lib/types.ts"],
+      "@constants": ["./src/lib/constants/index.ts"],
+      "@test-utils": ["./src/lib/test-utils/index.ts"],
+      "@/*": ["./src/*"],
+      "@assets/*": ["./src/assets/*"],
+      "@lib/*": ["./src/lib/*"],
+      "@components/*": ["./src/lib/components/*"],
+      "@hooks/*": ["./src/lib/hooks/*"],
+      "@services/*": ["./src/lib/services/*"],
+      "@config/*": ["./src/lib/config/*"],
+      "@constants/*": ["./src/lib/constants/*"],
+      "@lib-types/*": ["./src/lib/types/*"],
+      "@utils/*": ["./src/lib/utils/*"],
+      "@theme/*": ["./src/lib/theme/*"],
+      "@test-utils/*": ["./src/lib/test-utils/*"],
+      "@tests/*": ["./src/tests/*"],
+      "@demo/*": ["./src/demo/*"]
+    },
+
+    /* Vitest */
+    "types": ["vitest/globals", "@testing-library/jest-dom"]
   },
   "include": [
     "src"
   ],
   "exclude": [
-    "src/**/*.native.tsx",
-    "src/**/*.native.ts"
-  ]
+    "src/**/__tests__",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "node_modules"
+  ],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

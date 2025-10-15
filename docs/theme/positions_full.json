@@ -1,0 +1,632 @@
+{
+  "questlineId": "questline-treasure-hunt",
+  "frameSize": {
+    "width": 366,
+    "height": 572
+  },
+  "background": {
+    "exportUrl": "background.webp"
+  },
+  "timer": {
+    "position": {
+      "x": 183,
+      "y": 630
+    },
+    "dimensions": {
+      "width": 98,
+      "height": 32
+    },
+    "borderRadius": 100,
+    "backgroundFill": {
+      "type": "solid",
+      "color": "#c6ff77"
+    },
+    "isAutolayout": true,
+    "layoutSizing": {
+      "horizontal": "HUG",
+      "vertical": "HUG"
+    },
+    "padding": {
+      "vertical": 8,
+      "horizontal": 16
+    },
+    "dropShadows": [],
+    "textStyle": {
+      "fontSize": 16,
+      "color": "#1d092f",
+      "fontWeight": 900,
+      "textAlignHorizontal": "CENTER",
+      "textAlignVertical": "CENTER"
+    }
+  },
+  "header": {
+    "stateBounds": {
+      "active": {
+        "x": 183.5,
+        "y": -5.5,
+        "width": 275,
+        "height": 147,
+        "rotation": 0
+      },
+      "success": {
+        "x": 183.5,
+        "y": -5.5,
+        "width": 275,
+        "height": 147,
+        "rotation": 0
+      },
+      "fail": {
+        "x": 183.5,
+        "y": -5.5,
+        "width": 275,
+        "height": 147,
+        "rotation": 0
+      }
+    },
+    "activeImg": "header_active.webp",
+    "successImg": "header_success.webp",
+    "failImg": "header_fail.webp"
+  },
+  "rewards": {
+    "stateBounds": {
+      "active": {
+        "x": 183,
+        "y": 78.5,
+        "width": 366,
+        "height": 145,
+        "rotation": 0
+      },
+      "fail": {
+        "x": 183,
+        "y": 78.5,
+        "width": 366,
+        "height": 145,
+        "rotation": 0
+      },
+      "unclaimed": {
+        "x": 183,
+        "y": 78.5,
+        "width": 366,
+        "height": 145,
+        "rotation": 0
+      },
+      "claimed": {
+        "x": 183,
+        "y": 78.5,
+        "width": 366,
+        "height": 145,
+        "rotation": 0
+      }
+    },
+    "activeImg": "rewards_active.webp",
+    "failImg": "rewards_fail.webp",
+    "unclaimedImg": "rewards_unclaimed.webp",
+    "claimedImg": "rewards_claimed.webp"
+  },
+  "button": {
+    "position": {
+      "x": 183,
+      "y": 569
+    },
+    "stateStyles": {
+      "default": {
+        "frame": {
+          "borderRadius": 50,
+          "backgroundFill": {
+            "type": "gradient",
+            "gradient": {
+              "type": "linear",
+              "rotation": 163,
+              "transform": [
+                [
+                  0.3039807081222534,
+                  0.988178551197052,
+                  -0.14016887545585632
+                ],
+                [
+                  -0.988178551197052,
+                  0.03842916339635849,
+                  0.9556601047515869
+                ]
+              ],
+              "stops": [
+                {
+                  "color": "#47fff4",
+                  "position": 0
+                },
+                {
+                  "color": "#0586ae",
+                  "position": 0.9322916865348816
+                }
+              ],
+              "handleVectors": [
+                {
+                  "x": -0.6401688754558563,
+                  "y": 0.4556601047515869
+                },
+                {
+                  "x": -0.3361881673336029,
+                  "y": -0.5325184464454651
+                },
+                {
+                  "x": 0.3480096757411957,
+                  "y": 0.4940892681479454
+                }
+              ],
+              "handleOrigin": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            }
+          },
+          "isAutolayout": true,
+          "layoutMode": "HORIZONTAL",
+          "layoutSizing": {
+            "horizontal": "FIXED",
+            "vertical": "FIXED"
+          },
+          "primaryAxisAlignItems": "CENTER",
+          "counterAxisAlignItems": "CENTER",
+          "dimensions": {
+            "width": 154,
+            "height": 58
+          },
+          "padding": {
+            "vertical": 20,
+            "horizontal": 40
+          },
+          "dropShadows": [
+            {
+              "x": 0,
+              "y": 4,
+              "blur": 20,
+              "spread": 0,
+              "color": "#0586aecc"
+            },
+            {
+              "x": 0,
+              "y": -4,
+              "blur": 20,
+              "spread": 0,
+              "color": "#47fff4cc"
+            }
+          ],
+          "stroke": {
+            "width": 2,
+            "color": "#9ffff8"
+          }
+        },
+        "text": {
+          "fontSize": 18,
+          "color": "#ffffff",
+          "fontWeight": 900,
+          "textAlignHorizontal": "LEFT",
+          "textAlignVertical": "TOP",
+          "lineHeightPx": 18
+        }
+      },
+      "disabled": {
+        "frame": {
+          "borderRadius": 50,
+          "backgroundFill": {
+            "type": "gradient",
+            "gradient": {
+              "type": "linear",
+              "rotation": 163,
+              "transform": [
+                [
+                  0.3039807081222534,
+                  0.988178551197052,
+                  -0.14016887545585632
+                ],
+                [
+                  -0.988178551197052,
+                  0.03842916339635849,
+                  0.9556601047515869
+                ]
+              ],
+              "stops": [
+                {
+                  "color": "#0586ae",
+                  "position": 0
+                },
+                {
+                  "color": "#0586ae",
+                  "position": 0.9322916865348816
+                }
+              ],
+              "handleVectors": [
+                {
+                  "x": -0.6401688754558563,
+                  "y": 0.4556601047515869
+                },
+                {
+                  "x": -0.3361881673336029,
+                  "y": -0.5325184464454651
+                },
+                {
+                  "x": 0.3480096757411957,
+                  "y": 0.4940892681479454
+                }
+              ],
+              "handleOrigin": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            }
+          },
+          "isAutolayout": true,
+          "layoutMode": "HORIZONTAL",
+          "layoutSizing": {
+            "horizontal": "FIXED",
+            "vertical": "FIXED"
+          },
+          "primaryAxisAlignItems": "CENTER",
+          "counterAxisAlignItems": "CENTER",
+          "dimensions": {
+            "width": 154,
+            "height": 58
+          },
+          "padding": {
+            "vertical": 20,
+            "horizontal": 40
+          },
+          "dropShadows": [],
+          "stroke": {
+            "width": 2,
+            "color": "#2badd5"
+          }
+        },
+        "text": {
+          "fontSize": 18,
+          "color": "#ffffff66",
+          "fontWeight": 900,
+          "textAlignHorizontal": "LEFT",
+          "textAlignVertical": "TOP",
+          "lineHeightPx": 18
+        }
+      },
+      "hover": {
+        "frame": {
+          "borderRadius": 50,
+          "backgroundFill": {
+            "type": "gradient",
+            "gradient": {
+              "type": "linear",
+              "rotation": 163,
+              "transform": [
+                [
+                  0.3039807081222534,
+                  0.988178551197052,
+                  -0.14016887545585632
+                ],
+                [
+                  -0.988178551197052,
+                  0.03842916339635849,
+                  0.9556601047515869
+                ]
+              ],
+              "stops": [
+                {
+                  "color": "#1ec0d0",
+                  "position": 0
+                },
+                {
+                  "color": "#0586ae",
+                  "position": 0.9322916865348816
+                }
+              ],
+              "handleVectors": [
+                {
+                  "x": -0.6401688754558563,
+                  "y": 0.4556601047515869
+                },
+                {
+                  "x": -0.3361881673336029,
+                  "y": -0.5325184464454651
+                },
+                {
+                  "x": 0.3480096757411957,
+                  "y": 0.4940892681479454
+                }
+              ],
+              "handleOrigin": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            }
+          },
+          "isAutolayout": true,
+          "layoutMode": "HORIZONTAL",
+          "layoutSizing": {
+            "horizontal": "FIXED",
+            "vertical": "FIXED"
+          },
+          "primaryAxisAlignItems": "CENTER",
+          "counterAxisAlignItems": "CENTER",
+          "dimensions": {
+            "width": 154,
+            "height": 58
+          },
+          "padding": {
+            "vertical": 20,
+            "horizontal": 40
+          },
+          "dropShadows": [
+            {
+              "x": 0,
+              "y": 4,
+              "blur": 20,
+              "spread": 0,
+              "color": "#0586aecc"
+            },
+            {
+              "x": 0,
+              "y": -4,
+              "blur": 20,
+              "spread": 0,
+              "color": "#47fff4cc"
+            }
+          ],
+          "stroke": {
+            "width": 2,
+            "color": "#25ecff"
+          }
+        },
+        "text": {
+          "fontSize": 18,
+          "color": "#ffffff",
+          "fontWeight": 900,
+          "textAlignHorizontal": "LEFT",
+          "textAlignVertical": "TOP",
+          "lineHeightPx": 18
+        }
+      },
+      "active": {
+        "frame": {
+          "borderRadius": 50,
+          "backgroundFill": {
+            "type": "gradient",
+            "gradient": {
+              "type": "linear",
+              "rotation": 163,
+              "transform": [
+                [
+                  0.3039807081222534,
+                  0.988178551197052,
+                  -0.14016887545585632
+                ],
+                [
+                  -0.988178551197052,
+                  0.03842916339635849,
+                  0.9556601047515869
+                ]
+              ],
+              "stops": [
+                {
+                  "color": "#026786",
+                  "position": 0
+                },
+                {
+                  "color": "#0586ae",
+                  "position": 0.9322916865348816
+                }
+              ],
+              "handleVectors": [
+                {
+                  "x": -0.6401688754558563,
+                  "y": 0.4556601047515869
+                },
+                {
+                  "x": -0.3361881673336029,
+                  "y": -0.5325184464454651
+                },
+                {
+                  "x": 0.3480096757411957,
+                  "y": 0.4940892681479454
+                }
+              ],
+              "handleOrigin": {
+                "x": 0.5,
+                "y": 0.5
+              }
+            }
+          },
+          "isAutolayout": true,
+          "layoutMode": "HORIZONTAL",
+          "layoutSizing": {
+            "horizontal": "FIXED",
+            "vertical": "FIXED"
+          },
+          "primaryAxisAlignItems": "CENTER",
+          "counterAxisAlignItems": "CENTER",
+          "dimensions": {
+            "width": 154,
+            "height": 58
+          },
+          "padding": {
+            "vertical": 20,
+            "horizontal": 40
+          },
+          "dropShadows": [
+            {
+              "x": 0,
+              "y": 4,
+              "blur": 20,
+              "spread": 0,
+              "color": "#0586aecc"
+            }
+          ],
+          "stroke": {
+            "width": 2,
+            "color": "#1ec0d0"
+          }
+        },
+        "text": {
+          "fontSize": 18,
+          "color": "#ffffff",
+          "fontWeight": 900,
+          "textAlignHorizontal": "LEFT",
+          "textAlignVertical": "TOP",
+          "lineHeightPx": 18
+        }
+      }
+    }
+  },
+  "quests": [
+    {
+      "questKey": "quest1",
+      "stateBounds": {
+        "locked": {
+          "x": 261,
+          "y": 239,
+          "width": 101,
+          "height": 101,
+          "rotation": 0
+        },
+        "active": {
+          "x": 261,
+          "y": 239,
+          "width": 101,
+          "height": 101,
+          "rotation": 0
+        },
+        "unclaimed": {
+          "x": 261,
+          "y": 239,
+          "width": 101,
+          "height": 101,
+          "rotation": 0
+        },
+        "completed": {
+          "x": 261,
+          "y": 239,
+          "width": 101,
+          "height": 101,
+          "rotation": 0
+        }
+      },
+      "lockedImg": "quest1_locked.webp",
+      "activeImg": "quest1_active.webp",
+      "unclaimedImg": "quest1_unclaimed.webp",
+      "completedImg": "quest1_completed.webp"
+    },
+    {
+      "questKey": "quest2",
+      "stateBounds": {
+        "locked": {
+          "x": 146,
+          "y": 240,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        },
+        "active": {
+          "x": 146,
+          "y": 240,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        },
+        "unclaimed": {
+          "x": 146,
+          "y": 240,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        },
+        "completed": {
+          "x": 146,
+          "y": 240,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        }
+      },
+      "lockedImg": "quest2_locked.webp",
+      "activeImg": "quest2_active.webp",
+      "unclaimedImg": "quest2_unclaimed.webp",
+      "completedImg": "quest2_completed.webp"
+    },
+    {
+      "questKey": "quest3",
+      "stateBounds": {
+        "locked": {
+          "x": 105,
+          "y": 341,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        },
+        "active": {
+          "x": 105,
+          "y": 341,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        },
+        "unclaimed": {
+          "x": 105,
+          "y": 341,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        },
+        "completed": {
+          "x": 105,
+          "y": 341,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        }
+      },
+      "lockedImg": "quest3_locked.webp",
+      "activeImg": "quest3_active.webp",
+      "unclaimedImg": "quest3_unclaimed.webp",
+      "completedImg": "quest3_completed.webp"
+    },
+    {
+      "questKey": "quest4",
+      "stateBounds": {
+        "locked": {
+          "x": 251,
+          "y": 342,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        },
+        "active": {
+          "x": 251,
+          "y": 342,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        },
+        "unclaimed": {
+          "x": 251,
+          "y": 342,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        },
+        "completed": {
+          "x": 251,
+          "y": 342,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        }
+      },
+      "lockedImg": "quest4_locked.webp",
+      "activeImg": "quest4_active.webp",
+      "unclaimedImg": "quest4_unclaimed.webp",
+      "completedImg": "quest4_completed.webp"
+    }
+  ],
+  "exportedAt": "2025-10-15T15:05:23.429Z",
+  "metadata": {
+    "totalQuests": 4,
+    "exportFormat": "webp",
+    "version": "2.1"
+  }
+}

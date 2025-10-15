@@ -1,0 +1,484 @@
+{
+  "questlineId": "questline-treasure-hunt",
+  "frameSize": {
+    "width": 366,
+    "height": 572
+  },
+  "timer": {
+    "position": {
+      "x": 183,
+      "y": 630
+    },
+    "dimensions": {
+      "width": 98,
+      "height": 32
+    },
+    "borderRadius": 100,
+    "backgroundFill": {
+      "type": "solid",
+      "color": "#c6ff77"
+    },
+    "isAutolayout": true,
+    "layoutSizing": {
+      "horizontal": "HUG",
+      "vertical": "HUG"
+    },
+    "padding": {
+      "vertical": 8,
+      "horizontal": 16
+    },
+    "textStyle": {
+      "fontSize": 16,
+      "color": "#1d092f",
+      "fontWeight": 900,
+      "textAlignHorizontal": "CENTER",
+      "textAlignVertical": "CENTER"
+    }
+  },
+  "header": {
+    "stateBounds": {
+      "active": {
+        "x": 183.5,
+        "y": -5.5,
+        "width": 275,
+        "height": 147,
+        "rotation": 0
+      },
+      "success": {
+        "x": 183.5,
+        "y": -5.5,
+        "width": 275,
+        "height": 147,
+        "rotation": 0
+      },
+      "fail": {
+        "x": 183.5,
+        "y": -5.5,
+        "width": 275,
+        "height": 147,
+        "rotation": 0
+      }
+    }
+  },
+  "rewards": {
+    "stateBounds": {
+      "active": {
+        "x": 183,
+        "y": 78.5,
+        "width": 366,
+        "height": 145,
+        "rotation": 0
+      },
+      "fail": {
+        "x": 183,
+        "y": 78.5,
+        "width": 366,
+        "height": 145,
+        "rotation": 0
+      },
+      "unclaimed": {
+        "x": 183,
+        "y": 78.5,
+        "width": 366,
+        "height": 145,
+        "rotation": 0
+      },
+      "claimed": {
+        "x": 183,
+        "y": 78.5,
+        "width": 366,
+        "height": 145,
+        "rotation": 0
+      }
+    }
+  },
+  "button": {
+    "position": {
+      "x": 183,
+      "y": 569
+    },
+    "stateStyles": {
+      "default": {
+        "frame": {
+          "borderRadius": 50,
+          "backgroundFill": {
+            "type": "gradient",
+            "gradient": {
+              "type": "linear",
+              "rotation": 163,
+              "stops": [
+                {
+                  "color": "#47fff4",
+                  "position": 0
+                },
+                {
+                  "color": "#0586ae",
+                  "position": 0.9322916865348816
+                }
+              ]
+            }
+          },
+          "isAutolayout": true,
+          "layoutMode": "HORIZONTAL",
+          "layoutSizing": {
+            "horizontal": "FIXED",
+            "vertical": "FIXED"
+          },
+          "primaryAxisAlignItems": "CENTER",
+          "counterAxisAlignItems": "CENTER",
+          "dimensions": {
+            "width": 154,
+            "height": 58
+          },
+          "padding": {
+            "vertical": 20,
+            "horizontal": 40
+          },
+          "dropShadows": [
+            {
+              "x": 0,
+              "y": 4,
+              "blur": 20,
+              "spread": 0,
+              "color": "#0586aecc"
+            },
+            {
+              "x": 0,
+              "y": -4,
+              "blur": 20,
+              "spread": 0,
+              "color": "#47fff4cc"
+            }
+          ],
+          "stroke": {
+            "width": 2,
+            "color": "#9ffff8"
+          }
+        },
+        "text": {
+          "fontSize": 18,
+          "color": "#ffffff",
+          "fontWeight": 900,
+          "textAlignHorizontal": "LEFT",
+          "textAlignVertical": "TOP",
+          "lineHeightPx": 18
+        }
+      },
+      "disabled": {
+        "frame": {
+          "borderRadius": 50,
+          "backgroundFill": {
+            "type": "gradient",
+            "gradient": {
+              "type": "linear",
+              "rotation": 163,
+              "stops": [
+                {
+                  "color": "#0586ae",
+                  "position": 0
+                },
+                {
+                  "color": "#0586ae",
+                  "position": 0.9322916865348816
+                }
+              ]
+            }
+          },
+          "isAutolayout": true,
+          "layoutMode": "HORIZONTAL",
+          "layoutSizing": {
+            "horizontal": "FIXED",
+            "vertical": "FIXED"
+          },
+          "primaryAxisAlignItems": "CENTER",
+          "counterAxisAlignItems": "CENTER",
+          "dimensions": {
+            "width": 154,
+            "height": 58
+          },
+          "padding": {
+            "vertical": 20,
+            "horizontal": 40
+          },
+          "stroke": {
+            "width": 2,
+            "color": "#2badd5"
+          }
+        },
+        "text": {
+          "fontSize": 18,
+          "color": "#ffffff66",
+          "fontWeight": 900,
+          "textAlignHorizontal": "LEFT",
+          "textAlignVertical": "TOP",
+          "lineHeightPx": 18
+        }
+      },
+      "hover": {
+        "frame": {
+          "borderRadius": 50,
+          "backgroundFill": {
+            "type": "gradient",
+            "gradient": {
+              "type": "linear",
+              "rotation": 163,
+              "stops": [
+                {
+                  "color": "#1ec0d0",
+                  "position": 0
+                },
+                {
+                  "color": "#0586ae",
+                  "position": 0.9322916865348816
+                }
+              ]
+            }
+          },
+          "isAutolayout": true,
+          "layoutMode": "HORIZONTAL",
+          "layoutSizing": {
+            "horizontal": "FIXED",
+            "vertical": "FIXED"
+          },
+          "primaryAxisAlignItems": "CENTER",
+          "counterAxisAlignItems": "CENTER",
+          "dimensions": {
+            "width": 154,
+            "height": 58
+          },
+          "padding": {
+            "vertical": 20,
+            "horizontal": 40
+          },
+          "dropShadows": [
+            {
+              "x": 0,
+              "y": 4,
+              "blur": 20,
+              "spread": 0,
+              "color": "#0586aecc"
+            },
+            {
+              "x": 0,
+              "y": -4,
+              "blur": 20,
+              "spread": 0,
+              "color": "#47fff4cc"
+            }
+          ],
+          "stroke": {
+            "width": 2,
+            "color": "#25ecff"
+          }
+        },
+        "text": {
+          "fontSize": 18,
+          "color": "#ffffff",
+          "fontWeight": 900,
+          "textAlignHorizontal": "LEFT",
+          "textAlignVertical": "TOP",
+          "lineHeightPx": 18
+        }
+      },
+      "active": {
+        "frame": {
+          "borderRadius": 50,
+          "backgroundFill": {
+            "type": "gradient",
+            "gradient": {
+              "type": "linear",
+              "rotation": 163,
+              "stops": [
+                {
+                  "color": "#026786",
+                  "position": 0
+                },
+                {
+                  "color": "#0586ae",
+                  "position": 0.9322916865348816
+                }
+              ]
+            }
+          },
+          "isAutolayout": true,
+          "layoutMode": "HORIZONTAL",
+          "layoutSizing": {
+            "horizontal": "FIXED",
+            "vertical": "FIXED"
+          },
+          "primaryAxisAlignItems": "CENTER",
+          "counterAxisAlignItems": "CENTER",
+          "dimensions": {
+            "width": 154,
+            "height": 58
+          },
+          "padding": {
+            "vertical": 20,
+            "horizontal": 40
+          },
+          "dropShadows": [
+            {
+              "x": 0,
+              "y": 4,
+              "blur": 20,
+              "spread": 0,
+              "color": "#0586aecc"
+            }
+          ],
+          "stroke": {
+            "width": 2,
+            "color": "#1ec0d0"
+          }
+        },
+        "text": {
+          "fontSize": 18,
+          "color": "#ffffff",
+          "fontWeight": 900,
+          "textAlignHorizontal": "LEFT",
+          "textAlignVertical": "TOP",
+          "lineHeightPx": 18
+        }
+      }
+    }
+  },
+  "quests": [
+    {
+      "questKey": "quest1",
+      "stateBounds": {
+        "locked": {
+          "x": 261,
+          "y": 239,
+          "width": 101,
+          "height": 101,
+          "rotation": 0
+        },
+        "active": {
+          "x": 261,
+          "y": 239,
+          "width": 101,
+          "height": 101,
+          "rotation": 0
+        },
+        "unclaimed": {
+          "x": 261,
+          "y": 239,
+          "width": 101,
+          "height": 101,
+          "rotation": 0
+        },
+        "completed": {
+          "x": 261,
+          "y": 239,
+          "width": 101,
+          "height": 101,
+          "rotation": 0
+        }
+      }
+    },
+    {
+      "questKey": "quest2",
+      "stateBounds": {
+        "locked": {
+          "x": 146,
+          "y": 240,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        },
+        "active": {
+          "x": 146,
+          "y": 240,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        },
+        "unclaimed": {
+          "x": 146,
+          "y": 240,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        },
+        "completed": {
+          "x": 146,
+          "y": 240,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        }
+      }
+    },
+    {
+      "questKey": "quest3",
+      "stateBounds": {
+        "locked": {
+          "x": 105,
+          "y": 341,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        },
+        "active": {
+          "x": 105,
+          "y": 341,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        },
+        "unclaimed": {
+          "x": 105,
+          "y": 341,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        },
+        "completed": {
+          "x": 105,
+          "y": 341,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        }
+      }
+    },
+    {
+      "questKey": "quest4",
+      "stateBounds": {
+        "locked": {
+          "x": 251,
+          "y": 342,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        },
+        "active": {
+          "x": 251,
+          "y": 342,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        },
+        "unclaimed": {
+          "x": 251,
+          "y": 342,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        },
+        "completed": {
+          "x": 251,
+          "y": 342,
+          "width": 80,
+          "height": 80,
+          "rotation": 0
+        }
+      }
+    }
+  ],
+  "exportedAt": "2025-10-15T15:05:23.429Z",
+  "metadata": {
+    "totalQuests": 4,
+    "exportFormat": "webp",
+    "version": "2.1"
+  }
+}

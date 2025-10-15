@@ -1,0 +1,273 @@
+/* Questline Viewer Component Styles */
+
+/* Main Container Layout */
+.questline-container-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  min-height: 300px;
+  /* Container size is controlled by questline dimensions + padding */
+  width: calc(var(--questline-width, 800px) + 40px);
+  height: calc(var(--questline-height, 600px) + 40px);
+}
+
+/* Main Questline Canvas */
+.questline-viewer {
+  position: relative;
+  /* Dimensions set via CSS custom properties */
+  width: var(--questline-width, 800px);
+  height: var(--questline-height, 600px);
+
+  border-radius: 8px;
+  overflow: visible;
+  box-shadow: var(--elev-1, 0 4px 12px rgba(0, 0, 0, 0.1));
+}
+
+/* Content Bounds Indicator (Development/Debug Feature) */
+.content-bounds-indicator {
+  position: absolute;
+  left: var(--content-bounds-left, 0);
+  top: var(--content-bounds-top, 0);
+  width: var(--content-bounds-width, 100%);
+  height: var(--content-bounds-height, 100%);
+  border: 2px dotted #ff6b35;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.7;
+}
+
+/* Background Image Handling */
+.questline-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0; /* Changed from -1 to 0 to ensure it's visible */
+  pointer-events: none;
+}
+
+.questline-background-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: crisp-edges;
+  transform: translateZ(0);
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Quest Components */
+.quest-component {
+  position: absolute;
+  left: var(--quest-left);
+  top: var(--quest-top);
+  width: var(--quest-width);
+  height: var(--quest-height);
+  transform: var(--quest-transform);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  z-index: 10;
+}
+
+.quest-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.quest-fallback {
+  width: 100%;
+  height: 100%;
+  background-color: var(--quest-fallback-bg);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: var(--quest-fallback-font-size);
+  font-weight: bold;
+  text-align: center;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.quest-key-overlay {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  z-index: 10;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Header Component */
+.header-component {
+  position: absolute;
+  left: var(--header-left);
+  top: var(--header-top);
+  width: var(--header-width);
+  height: var(--header-height);
+  transform: var(--header-transform);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  z-index: 20;
+}
+
+.header-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.header-fallback {
+  width: 100%;
+  height: 100%;
+  background-color: var(--header-fallback-bg);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: var(--header-fallback-font-size);
+  font-weight: bold;
+  text-align: center;
+  border: 3px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Rewards Component */
+.rewards-component {
+  position: absolute;
+  left: var(--rewards-left);
+  top: var(--rewards-top);
+  width: var(--rewards-width);
+  height: var(--rewards-height);
+  transform: var(--rewards-transform);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  z-index: 15;
+}
+
+.rewards-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.rewards-fallback {
+  width: 100%;
+  height: 100%;
+  background-color: var(--rewards-fallback-bg);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: var(--rewards-fallback-font-size);
+  font-weight: bold;
+  text-align: center;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Timer Component */
+.timer-component {
+  position: absolute;
+  left: var(--timer-left);
+  top: var(--timer-top);
+  transform: translate(-50%, -50%) translateZ(0);
+  width: var(--timer-width, fit-content);
+  height: var(--timer-height, fit-content);
+  min-width: var(--timer-min-width, auto);
+  min-height: var(--timer-min-height, auto);
+  background: var(--timer-bg);
+  border-radius: var(--timer-border-radius);
+  box-shadow: var(--timer-box-shadow);
+  padding: var(--timer-padding);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--timer-font-size);
+  color: var(--timer-color);
+  font-weight: var(--timer-font-weight);
+  text-align: var(--timer-text-align);
+  z-index: 25;
+}
+
+/* Button Component */
+.button-component {
+  position: absolute;
+  left: var(--button-left);
+  top: var(--button-top);
+  transform: translate(-50%, -50%);
+  width: var(--button-width, fit-content);
+  height: var(--button-height, fit-content);
+  min-width: var(--button-min-width, auto);
+  min-height: var(--button-min-height, auto);
+  background: var(--button-bg);
+  border-radius: var(--button-border-radius);
+  box-shadow: var(--button-box-shadow);
+  border: var(--button-border);
+  padding: var(--button-padding);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--button-font-size);
+  color: var(--button-color);
+  font-weight: bold;
+  text-align: center;
+  user-select: none;
+  transition: all 0.15s ease;
+  z-index: 30;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.button-component:disabled {
+  cursor: not-allowed;
+} /* Responsive design */
+@media (max-width: 768px) {
+  .questline-container-wrapper {
+    padding: 10px;
+  }
+
+  .quest-fallback,
+  .header-fallback,
+  .rewards-fallback {
+    font-size: clamp(8px, 2vw, 14px);
+  }
+}
+
+.quest-item {
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.quest-item:hover {
+  opacity: 0.9;
+  transform: scale(1.4);
+}
