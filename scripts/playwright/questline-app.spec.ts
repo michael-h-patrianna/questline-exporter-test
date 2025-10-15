@@ -235,6 +235,53 @@ test.describe('Questline Exporter App - E2E Tests', () => {
     expect(visibleClass).not.toContain('component-hidden');
   });
 
+  test('should toggle quest keys display', async ({ page }: { page: Page }) => {
+    // Set desktop viewport first to see sidebar
+    await page.setViewportSize({ width: 1400, height: 900 });
+    await page.waitForTimeout(200);
+
+    // Wait for auto-loaded theme
+    await expect(
+      page.locator('.desktop-sidebar').getByText('Questline Settings')
+    ).toBeVisible({ timeout: 10000 });
+
+    // Find the "Show Quest Keys" checkbox
+    const questKeysCheckbox = page.locator('.desktop-sidebar input[type="checkbox"].toggle-checkbox');
+    await expect(questKeysCheckbox).toBeVisible();
+
+    // Verify checkbox is initially unchecked
+    await expect(questKeysCheckbox).not.toBeChecked();
+
+    // Verify quest key overlays are not visible initially
+    const questKeyOverlay = page.locator('.quest-key-overlay').first();
+    await expect(questKeyOverlay).not.toBeVisible();
+
+    // Click checkbox to enable quest keys
+    await questKeysCheckbox.click();
+    await page.waitForTimeout(100);
+
+    // Verify checkbox is now checked
+    await expect(questKeysCheckbox).toBeChecked();
+
+    // Verify quest key overlays are now visible
+    await expect(questKeyOverlay).toBeVisible();
+
+    // Verify the overlay contains quest key text
+    const overlayText = await questKeyOverlay.textContent();
+    expect(overlayText).toBeTruthy();
+    expect(overlayText?.length).toBeGreaterThan(0);
+
+    // Click checkbox again to disable
+    await questKeysCheckbox.click();
+    await page.waitForTimeout(100);
+
+    // Verify checkbox is unchecked
+    await expect(questKeysCheckbox).not.toBeChecked();
+
+    // Verify quest key overlays are hidden again
+    await expect(questKeyOverlay).not.toBeVisible();
+  });
+
   test.skip('should cycle quest states when clicked', async ({ page }: { page: Page }) => {
     const fileInput = page.locator('input[type="file"]').first();
     await fileInput.setInputFiles(testZipPath);
